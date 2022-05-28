@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  pull_request:
+
+env:
+  go_version: "1.17.5"
+
+jobs:
+  test:
+    name: unit-test
+    # Using shared runner due to performance issue
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.go_version }}
+
+      - run: make unit-test
