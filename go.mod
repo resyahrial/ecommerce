@@ -1,3 +1,3 @@
-module github.com/resyahrial/ecommerce
+module github.com/resyahrial/go-commerce
 
 go 1.17
