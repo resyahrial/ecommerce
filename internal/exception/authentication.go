@@ -13,6 +13,7 @@ func (e *E) InitAuthErr() {
 
 		// 4XX
 		AuthInvalidInput,
+		AuthInvalidInputValidation,
 		AuthNotAuthorized,
 		AuthForbidden,
 		AuthForbiddenRole,
@@ -22,6 +23,12 @@ func (e *E) InitAuthErr() {
 var AuthInvalidInput = &gexception.Exception{
 	HttpStatus:  http.StatusBadRequest,
 	Code:        "InvalidInput",
+	Description: "either email or password is invalid",
+}
+
+var AuthInvalidInputValidation = &gexception.Exception{
+	HttpStatus:  http.StatusBadRequest,
+	Code:        "InvalidInputValidation",
 	Description: "",
 }
 

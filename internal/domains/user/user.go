@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/mitchellh/mapstructure"
+	"github.com/resyahrial/go-commerce/pkg/hasher"
 	"github.com/segmentio/ksuid"
 )
 
@@ -43,6 +44,10 @@ func (u User) ToSeller() (seller Seller, ok bool) {
 	}
 
 	return
+}
+
+func (u User) ValidatePassword(password string) bool {
+	return hasher.CheckPasswordHash(password, u.Password)
 }
 
 type Buyer struct {

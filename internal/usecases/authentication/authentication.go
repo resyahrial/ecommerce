@@ -7,7 +7,6 @@ import (
 	"github.com/resyahrial/go-commerce/internal/domains/user"
 	"github.com/resyahrial/go-commerce/internal/exception"
 	"github.com/resyahrial/go-commerce/pkg/gtrace"
-	"github.com/resyahrial/go-commerce/pkg/inspect"
 )
 
 type AuthenticationUsecaseInterface interface {
@@ -34,16 +33,17 @@ func (u *AuthenticationUsecase) Login(ctx context.Context, input authentication.
 	defer gtrace.End(span, err)
 
 	if errDesc, ok := input.Validate(); !ok {
-		err = exception.AuthInvalidInput.New(errDesc)
+		err = exception.AuthInvalidInputValidation.New(errDesc)
 		return
 	}
 
 	user := user.User{Email: input.Email}
 	if user, err = u.userRepo.GetDetail(newCtx, user); err != nil {
 		return
+	} else if ok := user.ValidatePassword(input.Password); !ok || user.ID.IsNil() {
+		err = exception.AuthInvalidInput
+		return
 	}
-
-	inspect.Do(user)
 
 	return
 }
