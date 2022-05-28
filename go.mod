@@ -20,6 +20,7 @@ require (
 )
 
 require (
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/segmentio/ksuid v1.0.4
 	github.com/stretchr/testify v1.7.1
 	go.opentelemetry.io/otel v1.7.0
