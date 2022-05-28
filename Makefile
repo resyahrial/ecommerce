@@ -4,4 +4,3 @@ unit-test:
 
 	# Run unit test
 	go test -v ./... -cover -count=1
-	rm cover.out
