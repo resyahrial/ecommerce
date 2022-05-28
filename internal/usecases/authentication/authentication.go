@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/resyahrial/go-commerce/internal/domains/authentication"
+	"github.com/resyahrial/go-commerce/internal/domains/user"
 )
 
 type AuthenticationUsecaseInterface interface {
@@ -11,11 +12,16 @@ type AuthenticationUsecaseInterface interface {
 }
 
 type AuthenticationUsecase struct {
+	userRepo user.UserRepo
 	authRepo authentication.AuthenticationRepo
 }
 
-func New(authRepo authentication.AuthenticationRepo) AuthenticationUsecaseInterface {
+func New(
+	userRepo user.UserRepo,
+	authRepo authentication.AuthenticationRepo,
+) AuthenticationUsecaseInterface {
 	return &AuthenticationUsecase{
+		userRepo: userRepo,
 		authRepo: authRepo,
 	}
 }
