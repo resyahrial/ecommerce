@@ -7,8 +7,10 @@ import (
 	"github.com/golang/mock/gomock"
 	auth_dom "github.com/resyahrial/go-commerce/internal/domains/authentication"
 	auth_dom_mock "github.com/resyahrial/go-commerce/internal/domains/authentication/mocks"
+	user_dom "github.com/resyahrial/go-commerce/internal/domains/user"
 	user_dom_mock "github.com/resyahrial/go-commerce/internal/domains/user/mocks"
 	"github.com/resyahrial/go-commerce/internal/usecases/authentication"
+	"github.com/resyahrial/go-commerce/pkg/hasher"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -30,7 +32,21 @@ func (s *authenticationUsecaseSuite) SetupTest() {
 	s.ucase = authentication.New(s.userRepo, s.authRepo)
 }
 
-func (s *authenticationUsecaseSuite) Login_Success() {
-	_, err := s.ucase.Login(context.Background(), auth_dom.Login{})
+func (s *authenticationUsecaseSuite) TestLogin_Success() {
+	loginInput := auth_dom.Login{
+		Email:    "email@email.com",
+		Password: "qwerty",
+	}
+
+	hashedPassword, _ := hasher.HashPassword(loginInput.Password)
+
+	s.userRepo.EXPECT().GetDetail(gomock.Any(), user_dom.User{
+		Email: loginInput.Email,
+	}).Return(user_dom.User{
+		Email:    loginInput.Email,
+		Password: hashedPassword,
+	}, nil)
+
+	_, err := s.ucase.Login(context.Background(), loginInput)
 	s.Nil(err)
 }

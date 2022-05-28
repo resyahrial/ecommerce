@@ -5,6 +5,8 @@ import (
 
 	"github.com/resyahrial/go-commerce/internal/domains/authentication"
 	"github.com/resyahrial/go-commerce/internal/domains/user"
+	"github.com/resyahrial/go-commerce/pkg/gtrace"
+	"github.com/resyahrial/go-commerce/pkg/inspect"
 )
 
 type AuthenticationUsecaseInterface interface {
@@ -27,5 +29,15 @@ func New(
 }
 
 func (u *AuthenticationUsecase) Login(ctx context.Context, input authentication.Login) (token authentication.Token, err error) {
+	newCtx, span := gtrace.Start(ctx)
+	defer gtrace.End(span, err)
+
+	user := user.User{Email: input.Email}
+	if user, err = u.userRepo.GetDetail(newCtx, user); err != nil {
+		return
+	}
+
+	inspect.Do(user)
+
 	return
 }

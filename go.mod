@@ -21,6 +21,7 @@ require (
 	github.com/segmentio/ksuid v1.0.4
 	github.com/stretchr/testify v1.7.1
 	go.opentelemetry.io/otel v1.7.0
-	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
+	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
+	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
 	gorm.io/gorm v1.23.5
 )

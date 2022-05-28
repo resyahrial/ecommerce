@@ -12,11 +12,11 @@ type userDomainSuite struct {
 	suite.Suite
 }
 
-func TestAuthenticationUsecase(t *testing.T) {
+func TestUserDomain(t *testing.T) {
 	suite.Run(t, new(userDomainSuite))
 }
 
-func (s *userDomainSuite) UserToBuyer_Success() {
+func (s *userDomainSuite) TestUserToBuyer_Success() {
 	generalUser := user.User{
 		ID:   ksuid.New(),
 		Role: user.BUYER,
@@ -27,7 +27,7 @@ func (s *userDomainSuite) UserToBuyer_Success() {
 	s.Equal(generalUser.ID, buyer.ID)
 }
 
-func (s *userDomainSuite) UserToBuyer_Fail() {
+func (s *userDomainSuite) TestUserToBuyer_Fail() {
 	generalUser := user.User{
 		ID:   ksuid.New(),
 		Role: user.SELLER,
@@ -38,7 +38,7 @@ func (s *userDomainSuite) UserToBuyer_Fail() {
 	s.Equal(ksuid.Nil, buyer.ID)
 }
 
-func (s *userDomainSuite) UserToSeller_Success() {
+func (s *userDomainSuite) TestUserToSeller_Success() {
 	generalUser := user.User{
 		ID:   ksuid.New(),
 		Role: user.SELLER,
@@ -49,7 +49,7 @@ func (s *userDomainSuite) UserToSeller_Success() {
 	s.Equal(generalUser.ID, seller.ID)
 }
 
-func (s *userDomainSuite) UserToSeller_Fail() {
+func (s *userDomainSuite) TestUserToSeller_Fail() {
 	generalUser := user.User{
 		ID:   ksuid.New(),
 		Role: user.BUYER,

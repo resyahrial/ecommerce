@@ -20,6 +20,7 @@ type User struct {
 }
 
 func (u User) ToBuyer() (buyer Buyer, ok bool) {
+	ok = true
 	if u.Role != BUYER {
 		return buyer, false
 	}
@@ -32,6 +33,7 @@ func (u User) ToBuyer() (buyer Buyer, ok bool) {
 }
 
 func (u User) ToSeller() (seller Seller, ok bool) {
+	ok = true
 	if u.Role != SELLER {
 		return seller, false
 	}
