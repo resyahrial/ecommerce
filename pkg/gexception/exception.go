@@ -31,6 +31,11 @@ func (e *Exception) Error() string {
 	return e.Description
 }
 
+func (e *Exception) New(errDesc string) *Exception {
+	e.Description = errDesc
+	return e
+}
+
 func AddBaseExceptions(e interface{}) {
 	g := e
 	methodFinder := reflect.TypeOf(&g)
