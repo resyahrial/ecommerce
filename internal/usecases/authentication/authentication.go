@@ -5,8 +5,10 @@ import (
 
 	"github.com/resyahrial/go-commerce/internal/domains/authentication"
 	"github.com/resyahrial/go-commerce/internal/domains/user"
-	"github.com/resyahrial/go-commerce/internal/exception"
+	"github.com/resyahrial/go-commerce/internal/exceptions"
 	"github.com/resyahrial/go-commerce/pkg/gtrace"
+	"github.com/resyahrial/go-commerce/pkg/hasher"
+	tokenmanager "github.com/resyahrial/go-commerce/pkg/token-manager"
 )
 
 type AuthenticationUsecaseInterface interface {
@@ -14,18 +16,19 @@ type AuthenticationUsecaseInterface interface {
 }
 
 type AuthenticationUsecase struct {
-	userRepo user.UserRepo
-	authRepo authentication.AuthenticationRepo
+	authRepo     authentication.AuthenticationRepo
+	hashHandler  hasher.Hasher
+	tokenManager tokenmanager.TokenManager
+	userRepo     user.UserRepo
 }
 
 func New(
-	userRepo user.UserRepo,
 	authRepo authentication.AuthenticationRepo,
+	hashHandler hasher.Hasher,
+	tokenManager tokenmanager.TokenManager,
+	userRepo user.UserRepo,
 ) AuthenticationUsecaseInterface {
-	return &AuthenticationUsecase{
-		userRepo: userRepo,
-		authRepo: authRepo,
-	}
+	return &AuthenticationUsecase{authRepo, hashHandler, tokenManager, userRepo}
 }
 
 func (u *AuthenticationUsecase) Login(ctx context.Context, input authentication.Login) (token authentication.Token, err error) {
@@ -33,15 +36,15 @@ func (u *AuthenticationUsecase) Login(ctx context.Context, input authentication.
 	defer gtrace.End(span, err)
 
 	if errDesc, ok := input.Validate(); !ok {
-		err = exception.AuthInvalidInputValidation.New(errDesc)
+		err = exceptions.AuthInvalidInputValidation.New(errDesc)
 		return
 	}
 
 	user := user.User{Email: input.Email}
 	if user, err = u.userRepo.GetDetail(newCtx, user); err != nil {
 		return
-	} else if ok := user.ValidatePassword(input.Password); !ok || user.ID.IsNil() {
-		err = exception.AuthInvalidInput
+	} else if ok := u.hashHandler.Compare(input.Password, user.Password); !ok || user.ID.IsNil() {
+		err = exceptions.AuthInvalidInput
 		return
 	}
 

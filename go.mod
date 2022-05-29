@@ -22,6 +22,7 @@ require (
 	github.com/go-playground/locales v0.14.0
 	github.com/go-playground/universal-translator v0.18.0
 	github.com/go-playground/validator/v10 v10.11.0
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/segmentio/ksuid v1.0.4
 	github.com/stretchr/testify v1.7.1
