@@ -12,22 +12,22 @@ const (
 )
 
 type Order struct {
-	ID                         ksuid.KSUID `json:"ID"`
-	BuyerId                    ksuid.KSUID `json:"buyerId"`
-	SellerId                   ksuid.KSUID `json:"sellerId"`
-	DeliverySourceAddress      string      `json:"deliverySourceAddress"`
-	DeliveryDestinationAddress string      `json:"deliveryDestinationAddress"`
-	TotalPrice                 float64     `json:"totalPrice"`
-	Status                     string      `json:"status"`
-	Buyer                      user.Buyer  `json:"buyer"`
-	Seller                     user.Seller `json:"seller"`
-	Items                      []OrderItem `json:"items"`
+	ID                         ksuid.KSUID `json:"ID" mapstucture:"-"`
+	BuyerId                    ksuid.KSUID `json:"buyerId" mapstucture:"-"`
+	SellerId                   ksuid.KSUID `json:"sellerId" mapstucture:"-"`
+	DeliverySourceAddress      string      `json:"deliverySourceAddress" mapstucture:",omitempty"`
+	DeliveryDestinationAddress string      `json:"deliveryDestinationAddress" mapstucture:",omitempty"`
+	TotalPrice                 float64     `json:"totalPrice" mapstucture:"-"`
+	Status                     string      `json:"status" mapstucture:",omitempty"`
+	Buyer                      user.Buyer  `json:"buyer" mapstucture:"-"`
+	Seller                     user.Seller `json:"seller" mapstucture:"-"`
+	Items                      []OrderItem `json:"items" mapstucture:",omitempty"`
 }
 
 type OrderItem struct {
-	ID        ksuid.KSUID     `json:"ID"`
-	ProductId ksuid.KSUID     `json:"productId"`
-	Quantity  int64           `json:"quantity"`
-	Price     float64         `json:"price"`
-	Product   product.Product `json:"product"`
+	ID        ksuid.KSUID     `json:"ID" mapstucture:"-"`
+	ProductId ksuid.KSUID     `json:"productId" mapstucture:"-"`
+	Quantity  int64           `json:"quantity" mapstucture:",omitempty"`
+	Price     float64         `json:"price" mapstucture:",omitempty"`
+	Product   product.Product `json:"product" mapstucture:"-"`
 }
