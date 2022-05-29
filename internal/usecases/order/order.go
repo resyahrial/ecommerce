@@ -10,14 +10,12 @@ import (
 	"github.com/resyahrial/go-commerce/internal/exceptions"
 	"github.com/resyahrial/go-commerce/pkg/gtrace"
 	"github.com/resyahrial/go-commerce/pkg/gvalidator"
-	"github.com/resyahrial/go-commerce/pkg/inspect"
 	"github.com/segmentio/ksuid"
-	"github.com/thoas/go-funk"
 )
 
 type OrderUsecaseInterface interface {
 	GetList(ctx context.Context, params GetListParams) ([]order_dom.Order, int64, error)
-	Create(ctx context.Context, buyerId ksuid.KSUID, orderItems []order_dom.OrderItem) ([]order_dom.Order, error)
+	Create(ctx context.Context, buyerId ksuid.KSUID, order order_dom.Order) ([]order_dom.Order, error)
 }
 
 type GetListParams struct {
@@ -70,25 +68,29 @@ func (u *OrderUsecase) GetList(ctx context.Context, params GetListParams) (order
 	return u.orderRepo.GetList(newCtx, repoParams)
 }
 
-func (u *OrderUsecase) Create(ctx context.Context, buyerId ksuid.KSUID, orderItems []order_dom.OrderItem) (orders []order_dom.Order, err error) {
+func (u *OrderUsecase) Create(ctx context.Context, buyerId ksuid.KSUID, order order_dom.Order) (orders []order_dom.Order, err error) {
 	newCtx, span := gtrace.Start(ctx)
 	defer gtrace.Error(span, err)
 
 	/*
-		- construct order
 		- save order
 	*/
 
+	var productKsuids []ksuid.KSUID
 	var products []product_dom.Product
 	var productCount int64
+	sellerOrderItemMap := make(map[ksuid.KSUID][]order_dom.OrderItem)
+	ksuidQuantityMap := make(map[ksuid.KSUID]int64)
 
-	productKsuids := funk.Map(orderItems, func(orderItem order_dom.OrderItem) ksuid.KSUID {
-		return orderItem.Product.ID
-	}).([]ksuid.KSUID)
+	for _, orderItem := range order.Items {
+		productKsuids = append(productKsuids, orderItem.ProductId)
+		ksuidQuantityMap[orderItem.ProductId] = orderItem.Quantity
+	}
 
 	if products, productCount, err = u.productRepo.GetList(newCtx, product_dom.GetListParams{
-		Limit:  len(productKsuids),
-		Ksuids: productKsuids,
+		Limit:         len(productKsuids),
+		Ksuids:        productKsuids,
+		PreloadSeller: true,
 	}); err != nil {
 		return
 	} else if int(productCount) != len(productKsuids) {
@@ -96,7 +98,27 @@ func (u *OrderUsecase) Create(ctx context.Context, buyerId ksuid.KSUID, orderIte
 		return
 	}
 
-	inspect.Do(products)
+	for _, product := range products {
+		sellerOrderItemMap[product.Seller.ID] = append(
+			sellerOrderItemMap[product.Seller.ID],
+			order_dom.OrderItem{
+				ProductId: product.ID,
+				Quantity:  ksuidQuantityMap[product.ID],
+				Price:     product.Price,
+			},
+		)
+	}
+
+	for sellerId, items := range sellerOrderItemMap {
+		orders = append(orders, order_dom.Order{
+			BuyerId:                    buyerId,
+			SellerId:                   sellerId,
+			DeliverySourceAddress:      order.DeliverySourceAddress,
+			DeliveryDestinationAddress: order.DeliveryDestinationAddress,
+			Status:                     order_dom.PENDING,
+			Items:                      items,
+		})
+	}
 
 	return
 }
