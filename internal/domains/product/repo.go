@@ -9,7 +9,7 @@ import (
 //go:generate mockgen -destination=mocks/mock.go -source=repo.go ProductRepo
 
 type ProductRepo interface {
-	GetList(ctx context.Context, params GetListParams) ([]Product, error)
+	GetList(ctx context.Context, params GetListParams) ([]Product, int64, error)
 }
 
 type GetListParams struct {

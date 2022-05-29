@@ -36,12 +36,13 @@ func (m *MockProductRepo) EXPECT() *MockProductRepoMockRecorder {
 }
 
 // GetList mocks base method.
-func (m *MockProductRepo) GetList(ctx context.Context, params product.GetListParams) ([]product.Product, error) {
+func (m *MockProductRepo) GetList(ctx context.Context, params product.GetListParams) ([]product.Product, int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetList", ctx, params)
 	ret0, _ := ret[0].([]product.Product)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(int64)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // GetList indicates an expected call of GetList.
