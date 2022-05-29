@@ -1,6 +1,7 @@
 package gexception
 
 import (
+	"fmt"
 	"reflect"
 
 	log "github.com/sirupsen/logrus"
@@ -28,7 +29,7 @@ type Exception struct {
 }
 
 func (e *Exception) Error() string {
-	return e.Description
+	return fmt.Sprintf("%s-%s", e.Module, e.Description)
 }
 
 func (e *Exception) New(errDesc string) *Exception {

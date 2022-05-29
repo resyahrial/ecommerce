@@ -10,6 +10,7 @@ import (
 
 type ProductRepo interface {
 	GetList(ctx context.Context, params GetListParams) ([]Product, int64, error)
+	Create(ctx context.Context, input Product) (Product, error)
 }
 
 type GetListParams struct {

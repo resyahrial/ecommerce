@@ -3,8 +3,8 @@ package authentication
 import "github.com/resyahrial/go-commerce/pkg/gvalidator"
 
 type Login struct {
-	Email    string `json:"email" validate:"email"`
-	Password string `json:"-"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"-" validate:"required"`
 }
 
 func (l Login) Validate() (string, bool) {
