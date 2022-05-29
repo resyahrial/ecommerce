@@ -11,6 +11,7 @@ import (
 type OrderRepo interface {
 	GetList(ctx context.Context, params GetListParams) ([]Order, int64, error)
 	Create(ctx context.Context, input Order) (Order, error)
+	BulkCreate(ctx context.Context, inputs []Order) ([]Order, error)
 }
 
 type GetListParams struct {

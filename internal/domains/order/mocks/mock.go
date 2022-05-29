@@ -35,6 +35,21 @@ func (m *MockOrderRepo) EXPECT() *MockOrderRepoMockRecorder {
 	return m.recorder
 }
 
+// BulkCreate mocks base method.
+func (m *MockOrderRepo) BulkCreate(ctx context.Context, inputs []order.Order) ([]order.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BulkCreate", ctx, inputs)
+	ret0, _ := ret[0].([]order.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BulkCreate indicates an expected call of BulkCreate.
+func (mr *MockOrderRepoMockRecorder) BulkCreate(ctx, inputs interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BulkCreate", reflect.TypeOf((*MockOrderRepo)(nil).BulkCreate), ctx, inputs)
+}
+
 // Create mocks base method.
 func (m *MockOrderRepo) Create(ctx context.Context, input order.Order) (order.Order, error) {
 	m.ctrl.T.Helper()

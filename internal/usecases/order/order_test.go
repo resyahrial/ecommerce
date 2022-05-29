@@ -7,7 +7,7 @@ import (
 	"github.com/golang/mock/gomock"
 	order_dom "github.com/resyahrial/go-commerce/internal/domains/order"
 	order_dom_mock "github.com/resyahrial/go-commerce/internal/domains/order/mocks"
-	"github.com/resyahrial/go-commerce/internal/domains/product"
+	product_dom "github.com/resyahrial/go-commerce/internal/domains/product"
 	product_dom_mock "github.com/resyahrial/go-commerce/internal/domains/product/mocks"
 	user_dom "github.com/resyahrial/go-commerce/internal/domains/user"
 	"github.com/resyahrial/go-commerce/internal/usecases/order"
@@ -109,7 +109,7 @@ func (s *orderUsecaseSuite) TestGetList_Success() {
 			Items: []order_dom.OrderItem{
 				{
 					ID: ksuid.New(),
-					Product: product.Product{
+					Product: product_dom.Product{
 						ID: ksuid.New(),
 					},
 					Quantity: 1,
@@ -126,4 +126,113 @@ func (s *orderUsecaseSuite) TestGetList_Success() {
 	s.Nil(err)
 	s.Equal(orderList, orders)
 	s.Equal(countFromRepo, count)
+}
+
+func (s *orderUsecaseSuite) TestCreate_Success() {
+	firstSeller := user_dom.Seller{
+		ID:      ksuid.New(),
+		Address: "JKT",
+	}
+
+	secondSeller := user_dom.Seller{
+		ID:      ksuid.New(),
+		Address: "BDG",
+	}
+
+	product1 := product_dom.Product{
+		ID:     ksuid.New(),
+		Price:  100,
+		Seller: secondSeller,
+	}
+
+	product2 := product_dom.Product{
+		ID:     ksuid.New(),
+		Price:  100,
+		Seller: firstSeller,
+	}
+
+	product3 := product_dom.Product{
+		ID:     ksuid.New(),
+		Price:  100,
+		Seller: firstSeller,
+	}
+
+	order := order_dom.Order{
+		BuyerId:                    ksuid.New(),
+		DeliveryDestinationAddress: "BKS",
+		Items: []order_dom.OrderItem{
+			{
+				ProductId: product1.ID,
+				Quantity:  1,
+			},
+			{
+				ProductId: product2.ID,
+				Quantity:  2,
+			},
+			{
+				ProductId: product3.ID,
+				Quantity:  3,
+			},
+			{
+				ProductId: product1.ID,
+				Quantity:  3,
+			},
+		},
+	}
+	totalProductSearched := int64(3)
+
+	s.productRepo.EXPECT().GetList(gomock.Any(), product_dom.GetListParams{
+		Limit:         int(totalProductSearched),
+		Ksuids:        []ksuid.KSUID{product1.ID, product2.ID, product3.ID},
+		PreloadSeller: true,
+	}).Return([]product_dom.Product{product1, product2, product3}, totalProductSearched, nil)
+
+	s.orderRepo.EXPECT().BulkCreate(gomock.Any(), []order_dom.Order{
+		{
+			BuyerId:                    order.BuyerId,
+			SellerId:                   secondSeller.ID,
+			DeliverySourceAddress:      secondSeller.Address,
+			DeliveryDestinationAddress: order.DeliveryDestinationAddress,
+			Items: []order_dom.OrderItem{
+				{
+					ProductId: product1.ID,
+					Quantity:  4,
+					Price:     product1.Price,
+				},
+			},
+		},
+		{
+			BuyerId:                    order.BuyerId,
+			SellerId:                   firstSeller.ID,
+			DeliverySourceAddress:      firstSeller.Address,
+			DeliveryDestinationAddress: order.DeliveryDestinationAddress,
+			Items: []order_dom.OrderItem{
+				{
+					ProductId: product2.ID,
+					Quantity:  2,
+					Price:     product2.Price,
+				},
+				{
+					ProductId: product3.ID,
+					Quantity:  3,
+					Price:     product3.Price,
+				},
+			},
+		},
+	}).Return([]order_dom.Order{
+		{
+			ID:         ksuid.New(),
+			Status:     order_dom.PENDING,
+			TotalPrice: 500,
+		},
+		{
+			ID:         ksuid.New(),
+			Status:     order_dom.PENDING,
+			TotalPrice: 400,
+		},
+	}, nil)
+
+	orders, err := s.ucase.Create(context.Background(), order)
+	s.Nil(err)
+	s.Len(orders, 2)
 }

@@ -18,4 +18,5 @@ type GetListParams struct {
 	Limit         int
 	SellerId      ksuid.KSUID
 	PreloadSeller bool
+	Ksuids        []ksuid.KSUID
 }

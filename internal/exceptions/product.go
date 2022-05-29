@@ -13,6 +13,7 @@ func (e *E) InitProductErr() {
 
 		// 4XX
 		ProductInvalidInputValidation,
+		ProductNotFound,
 	)
 }
 
@@ -20,4 +21,10 @@ var ProductInvalidInputValidation = &gexception.Exception{
 	HttpStatus:  http.StatusBadRequest,
 	Code:        "InvalidInputValidation",
 	Description: "",
+}
+
+var ProductNotFound = &gexception.Exception{
+	HttpStatus:  http.StatusNotFound,
+	Code:        "NotFound",
+	Description: "one or few product not found",
 }
