@@ -1,10 +1,13 @@
 package product_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	product_dom "github.com/resyahrial/go-commerce/internal/domains/product"
 	product_dom_mock "github.com/resyahrial/go-commerce/internal/domains/product/mocks"
+	"github.com/resyahrial/go-commerce/internal/domains/user"
 	"github.com/resyahrial/go-commerce/internal/usecases/product"
 	"github.com/segmentio/ksuid"
 	"github.com/stretchr/testify/suite"
@@ -44,4 +47,31 @@ func (s *productUsecaseSuite) TestParamsToRepoParams_Success() {
 	noPreloadRepoParams, err := noPreloadSellerparams.ToRepoParams()
 	s.Nil(err)
 	s.True(noPreloadRepoParams.PreloadSeller)
+}
+
+func (s *productUsecaseSuite) TestGetList_Success() {
+	params := product.GetListParams{
+		Page:     0,
+		Limit:    1,
+		SellerId: ksuid.New(),
+	}
+
+	repoParams, _ := params.ToRepoParams()
+
+	productList := []product_dom.Product{
+		{
+			ID: ksuid.New(),
+			Seller: user.Seller{
+				ID: params.SellerId,
+			},
+		},
+	}
+	countRepo := int64(10)
+
+	s.productRepo.EXPECT().GetList(gomock.Any(), repoParams).Return(productList, countRepo, nil)
+
+	products, count, err := s.ucase.GetList(context.Background(), params)
+	s.Nil(err)
+	s.Equal(countRepo, count)
+	s.Equal(productList, products)
 }
