@@ -5,7 +5,11 @@
 package mock_product
 
 import (
+	context "context"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
+	product "github.com/resyahrial/go-commerce/internal/domains/product"
 )
 
 // MockProductRepo is a mock of ProductRepo interface.
@@ -29,4 +33,20 @@ func NewMockProductRepo(ctrl *gomock.Controller) *MockProductRepo {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockProductRepo) EXPECT() *MockProductRepoMockRecorder {
 	return m.recorder
+}
+
+// GetList mocks base method.
+func (m *MockProductRepo) GetList(ctx context.Context, params product.GetListParams) ([]product.Product, int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetList", ctx, params)
+	ret0, _ := ret[0].([]product.Product)
+	ret1, _ := ret[1].(int64)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetList indicates an expected call of GetList.
+func (mr *MockProductRepoMockRecorder) GetList(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetList", reflect.TypeOf((*MockProductRepo)(nil).GetList), ctx, params)
 }
