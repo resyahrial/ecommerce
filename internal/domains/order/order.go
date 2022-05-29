@@ -12,22 +12,22 @@ const (
 )
 
 type Order struct {
-	ID                         ksuid.KSUID `json:"ID" mapstucture:"-"`
-	BuyerId                    ksuid.KSUID `json:"buyerId" mapstucture:"-"`
-	SellerId                   ksuid.KSUID `json:"sellerId" mapstucture:"-"`
-	DeliverySourceAddress      string      `json:"deliverySourceAddress" mapstucture:",omitempty"`
-	DeliveryDestinationAddress string      `json:"deliveryDestinationAddress" mapstucture:",omitempty"`
-	TotalPrice                 float64     `json:"totalPrice" mapstucture:"-"`
-	Status                     string      `json:"status" mapstucture:",omitempty"`
-	Buyer                      user.Buyer  `json:"buyer" mapstucture:"-"`
-	Seller                     user.Seller `json:"seller" mapstucture:"-"`
-	Items                      []OrderItem `json:"items" mapstucture:",omitempty"`
+	ID                         ksuid.KSUID `json:"id" mapstructure:"-"`
+	BuyerId                    ksuid.KSUID `json:"buyerId" mapstructure:"-"`
+	SellerId                   ksuid.KSUID `json:"sellerId" mapstructure:"-"`
+	DeliverySourceAddress      string      `json:"deliverySourceAddress" mapstructure:",omitempty"`
+	DeliveryDestinationAddress string      `json:"deliveryDestinationAddress" mapstructure:",omitempty"`
+	TotalPrice                 float64     `json:"totalPrice" mapstructure:"-"`
+	Status                     string      `json:"status" mapstructure:",omitempty"`
+	Buyer                      user.Buyer  `json:"buyer" mapstructure:"-"`
+	Seller                     user.Seller `json:"seller" mapstructure:"-"`
+	Items                      []OrderItem `json:"items" mapstructure:",omitempty"`
 }
 
 type OrderItem struct {
-	ID        ksuid.KSUID     `json:"ID" mapstucture:"-"`
-	ProductId ksuid.KSUID     `json:"productId" mapstucture:"-"`
-	Quantity  int64           `json:"quantity" mapstucture:",omitempty"`
-	Price     float64         `json:"price" mapstucture:",omitempty"`
-	Product   product.Product `json:"product" mapstucture:"-"`
+	ID        ksuid.KSUID     `json:"id" mapstructure:"-"`
+	ProductId ksuid.KSUID     `json:"productId" mapstructure:"-"`
+	Quantity  int64           `json:"quantity" mapstructure:",omitempty"`
+	Price     float64         `json:"price" mapstructure:",omitempty"`
+	Product   product.Product `json:"product" mapstructure:"-"`
 }

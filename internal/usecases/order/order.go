@@ -127,13 +127,5 @@ func (u *OrderUsecase) Update(ctx context.Context, orderId ksuid.KSUID, input or
 	newCtx, span := gtrace.Start(ctx)
 	defer gtrace.End(span, err)
 
-	if res, err = u.orderRepo.GetDetailByParams(newCtx, order_dom.Order{ID: orderId}); err != nil {
-		return
-	}
-
-	if err = mapstructure.Decode(input, &res); err != nil {
-		return
-	}
-
-	return u.orderRepo.Update(newCtx, res.ID, res)
+	return u.orderRepo.Update(newCtx, orderId, input)
 }

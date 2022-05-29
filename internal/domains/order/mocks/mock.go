@@ -66,21 +66,6 @@ func (mr *MockOrderRepoMockRecorder) Create(ctx, input interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOrderRepo)(nil).Create), ctx, input)
 }
 
-// GetDetailByParams mocks base method.
-func (m *MockOrderRepo) GetDetailByParams(ctx context.Context, input order.Order) (order.Order, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDetailByParams", ctx, input)
-	ret0, _ := ret[0].(order.Order)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetDetailByParams indicates an expected call of GetDetailByParams.
-func (mr *MockOrderRepoMockRecorder) GetDetailByParams(ctx, input interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDetailByParams", reflect.TypeOf((*MockOrderRepo)(nil).GetDetailByParams), ctx, input)
-}
-
 // GetList mocks base method.
 func (m *MockOrderRepo) GetList(ctx context.Context, params order.GetListParams) ([]order.Order, int64, error) {
 	m.ctrl.T.Helper()

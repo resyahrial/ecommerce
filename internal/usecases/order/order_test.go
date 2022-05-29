@@ -236,3 +236,19 @@ func (s *orderUsecaseSuite) TestCreate_Success() {
 	s.Nil(err)
 	s.Len(orders, 2)
 }
+
+func (s *orderUsecaseSuite) TestUpdate_Success() {
+	orderId := ksuid.New()
+	input := order_dom.Order{Status: order_dom.ACCEPTED}
+
+	s.orderRepo.EXPECT().Update(gomock.Any(), orderId, input).Return(
+		order_dom.Order{ID: orderId, Status: input.Status},
+		nil,
+	)
+
+	orderRes, err := s.ucase.Update(context.Background(), orderId, input)
+	s.Nil(err)
+	s.Equal(orderId, orderRes.ID)
+	s.Equal(input.Status, orderRes.Status)
+
+}

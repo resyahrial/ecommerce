@@ -10,7 +10,6 @@ import (
 
 type OrderRepo interface {
 	GetList(ctx context.Context, params GetListParams) ([]Order, int64, error)
-	GetDetailByParams(ctx context.Context, input Order) (Order, error)
 	Create(ctx context.Context, input Order) (Order, error)
 	BulkCreate(ctx context.Context, inputs []Order) ([]Order, error)
 	Update(ctx context.Context, id ksuid.KSUID, input Order) (Order, error)
