@@ -12,11 +12,12 @@ import (
 	"github.com/resyahrial/go-commerce/pkg/gvalidator"
 	"github.com/resyahrial/go-commerce/pkg/inspect"
 	"github.com/segmentio/ksuid"
+	"github.com/thoas/go-funk"
 )
 
 type OrderUsecaseInterface interface {
 	GetList(ctx context.Context, params GetListParams) ([]order_dom.Order, int64, error)
-	Create(ctx context.Context, order order_dom.Order) (order_dom.Order, error)
+	Create(ctx context.Context, buyerId ksuid.KSUID, orderItems []order_dom.OrderItem) ([]order_dom.Order, error)
 }
 
 type GetListParams struct {
@@ -69,9 +70,33 @@ func (u *OrderUsecase) GetList(ctx context.Context, params GetListParams) (order
 	return u.orderRepo.GetList(newCtx, repoParams)
 }
 
-func (u *OrderUsecase) Create(ctx context.Context, order order_dom.Order) (res order_dom.Order, err error) {
+func (u *OrderUsecase) Create(ctx context.Context, buyerId ksuid.KSUID, orderItems []order_dom.OrderItem) (orders []order_dom.Order, err error) {
 	newCtx, span := gtrace.Start(ctx)
 	defer gtrace.Error(span, err)
-	inspect.Do(newCtx)
+
+	/*
+		- construct order
+		- save order
+	*/
+
+	var products []product_dom.Product
+	var productCount int64
+
+	productKsuids := funk.Map(orderItems, func(orderItem order_dom.OrderItem) ksuid.KSUID {
+		return orderItem.Product.ID
+	}).([]ksuid.KSUID)
+
+	if products, productCount, err = u.productRepo.GetList(newCtx, product_dom.GetListParams{
+		Limit:  len(productKsuids),
+		Ksuids: productKsuids,
+	}); err != nil {
+		return
+	} else if int(productCount) != len(productKsuids) {
+		err = exceptions.ProductNotFound
+		return
+	}
+
+	inspect.Do(products)
+
 	return
 }
