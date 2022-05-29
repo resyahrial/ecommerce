@@ -1,10 +1,13 @@
 package order_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	order_dom "github.com/resyahrial/go-commerce/internal/domains/order"
 	order_dom_mock "github.com/resyahrial/go-commerce/internal/domains/order/mocks"
+	"github.com/resyahrial/go-commerce/internal/domains/product"
 	product_dom_mock "github.com/resyahrial/go-commerce/internal/domains/product/mocks"
 	user_dom "github.com/resyahrial/go-commerce/internal/domains/user"
 	"github.com/resyahrial/go-commerce/internal/usecases/order"
@@ -85,4 +88,42 @@ func (s *orderUsecaseSuite) TestParamsValidate_SuccessValidate() {
 	errDesc, ok = invalidRoleParams.Validate()
 	s.False(ok)
 	s.NotEmpty(errDesc)
+}
+
+func (s *orderUsecaseSuite) TestGetList_Success() {
+	params := order.GetListParams{
+		Page:   0,
+		Limit:  1,
+		UserId: ksuid.New(),
+		Role:   user_dom.BUYER,
+	}
+	repoParams, _ := params.ToRepoParams()
+
+	orderList := []order_dom.Order{
+		{
+			ID:         ksuid.New(),
+			Buyer:      user_dom.Buyer{ID: params.UserId},
+			Seller:     user_dom.Seller{ID: ksuid.New()},
+			Status:     order_dom.PENDING,
+			TotalPrice: 1000,
+			Items: []order_dom.OrderItem{
+				{
+					ID: ksuid.New(),
+					Product: product.Product{
+						ID: ksuid.New(),
+					},
+					Quantity: 1,
+					Price:    1000,
+				},
+			},
+		},
+	}
+	countFromRepo := int64(10)
+
+	s.orderRepo.EXPECT().GetList(gomock.Any(), repoParams).Return(orderList, countFromRepo, nil)
+
+	orders, count, err := s.ucase.GetList(context.Background(), params)
+	s.Nil(err)
+	s.Equal(orderList, orders)
+	s.Equal(countFromRepo, count)
 }

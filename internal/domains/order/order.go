@@ -6,6 +6,11 @@ import (
 	"github.com/segmentio/ksuid"
 )
 
+const (
+	PENDING  = "PENDING"
+	ACCEPTED = "ACCEPTED"
+)
+
 type Order struct {
 	ID                         ksuid.KSUID `json:"ID"`
 	Buyer                      user.Buyer  `json:"buyer"`
