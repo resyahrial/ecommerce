@@ -72,10 +72,6 @@ func (u *OrderUsecase) Create(ctx context.Context, buyerId ksuid.KSUID, order or
 	newCtx, span := gtrace.Start(ctx)
 	defer gtrace.Error(span, err)
 
-	/*
-		- save order
-	*/
-
 	var productKsuids []ksuid.KSUID
 	var products []product_dom.Product
 	var productCount int64
@@ -120,5 +116,5 @@ func (u *OrderUsecase) Create(ctx context.Context, buyerId ksuid.KSUID, order or
 		})
 	}
 
-	return
+	return u.orderRepo.BulkCreate(newCtx, orders)
 }
