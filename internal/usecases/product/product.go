@@ -11,6 +11,7 @@ import (
 
 type ProductUsecaseInterface interface {
 	GetList(ctx context.Context, params GetListParams) ([]product_dom.Product, int64, error)
+	Create(ctx context.Context, product product_dom.Product) (product_dom.Product, error)
 }
 
 type GetListParams struct {
@@ -50,4 +51,11 @@ func (u *ProductUsecase) GetList(ctx context.Context, params GetListParams) (pro
 	}
 
 	return u.productRepo.GetList(newCtx, repoParams)
+}
+
+func (u *ProductUsecase) Create(ctx context.Context, product product_dom.Product) (res product_dom.Product, err error) {
+	newCtx, span := gtrace.Start(ctx)
+	defer gtrace.End(span, err)
+
+	return u.productRepo.Create(newCtx, product)
 }

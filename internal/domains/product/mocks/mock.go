@@ -35,6 +35,21 @@ func (m *MockProductRepo) EXPECT() *MockProductRepoMockRecorder {
 	return m.recorder
 }
 
+// Create mocks base method.
+func (m *MockProductRepo) Create(ctx context.Context, input product.Product) (product.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, input)
+	ret0, _ := ret[0].(product.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockProductRepoMockRecorder) Create(ctx, input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockProductRepo)(nil).Create), ctx, input)
+}
+
 // GetList mocks base method.
 func (m *MockProductRepo) GetList(ctx context.Context, params product.GetListParams) ([]product.Product, int64, error) {
 	m.ctrl.T.Helper()
