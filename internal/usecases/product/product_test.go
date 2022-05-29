@@ -75,3 +75,41 @@ func (s *productUsecaseSuite) TestGetList_Success() {
 	s.Equal(countRepo, count)
 	s.Equal(productList, products)
 }
+
+func (s *productUsecaseSuite) TestCreate_Success() {
+	input := product_dom.Product{
+		Name:        "Product 1",
+		Description: "Super Faboulus Awesome Product",
+		Price:       100,
+		SellerId:    ksuid.New(),
+	}
+	productKsuid := ksuid.New()
+
+	s.productRepo.EXPECT().Create(gomock.Any(), input).Return(product_dom.Product{
+		ID:          productKsuid,
+		Name:        input.Name,
+		Description: input.Description,
+		Price:       input.Price,
+		SellerId:    input.SellerId,
+	}, nil)
+
+	res, err := s.ucase.Create(context.Background(), input)
+	s.Nil(err)
+	s.Equal(productKsuid, res.ID)
+	s.Equal(input.Name, res.Name)
+	s.Equal(input.Description, res.Description)
+	s.Equal(input.Price, res.Price)
+	s.Equal(input.SellerId, res.SellerId)
+}
+
+func (s *productUsecaseSuite) TestCreate_FailedValidation() {
+	input := product_dom.Product{
+		Name:        "Product 1",
+		Description: "Super Faboulus Awesome Product",
+		Price:       0,
+	}
+
+	res, err := s.ucase.Create(context.Background(), input)
+	s.NotNil(err)
+	s.Equal(ksuid.Nil, res.ID)
+}

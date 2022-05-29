@@ -11,7 +11,8 @@ type Product struct {
 	Name        string      `json:"name" validate:"required,max=50"`
 	Description string      `json:"description" validate:"required"`
 	Price       float64     `json:"price" validate:"required,gte=0"`
-	Seller      user.Seller `json:"seller"`
+	SellerId    ksuid.KSUID `json:"sellerId" validate:"required"`
+	Seller      user.Seller `json:"seller" validate:"-"`
 }
 
 func (p Product) Validate() (string, bool) {
