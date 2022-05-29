@@ -11,6 +11,7 @@ import (
 	user_dom_mock "github.com/resyahrial/go-commerce/internal/domains/user/mocks"
 	"github.com/resyahrial/go-commerce/internal/usecases/authentication"
 	hasher_mock "github.com/resyahrial/go-commerce/pkg/hasher/mocks"
+	tokenmanager "github.com/resyahrial/go-commerce/pkg/token-manager"
 	token_manager_mock "github.com/resyahrial/go-commerce/pkg/token-manager/mocks"
 	"github.com/segmentio/ksuid"
 	"github.com/stretchr/testify/suite"
@@ -39,21 +40,35 @@ func (s *authenticationUsecaseSuite) SetupTest() {
 }
 
 func (s *authenticationUsecaseSuite) TestLogin_Success() {
+	hashedPassword := "hashedPassword"
+	accessToken := "accessToken"
+	refreshToken := "refreshToken"
+
 	loginInput := auth_dom.Login{
 		Email:    "email@email.com",
 		Password: "qwerty",
 	}
 
-	s.userRepo.EXPECT().GetDetail(gomock.Any(), user_dom.User{
-		Email: loginInput.Email,
-	}).Return(user_dom.User{
+	user := user_dom.User{
 		ID:       ksuid.New(),
 		Email:    loginInput.Email,
-		Password: "hashedPassword",
-	}, nil)
+		Password: hashedPassword,
+	}
 
-	s.hashHandler.EXPECT().Compare(loginInput.Password, "hashedPassword").Return(true)
+	s.userRepo.EXPECT().GetDetail(gomock.Any(), user_dom.User{
+		Email: loginInput.Email,
+	}).Return(user, nil)
 
-	_, err := s.ucase.Login(context.Background(), loginInput)
+	s.hashHandler.EXPECT().Compare(loginInput.Password, hashedPassword).Return(true)
+
+	tokenClaims := tokenmanager.Claims{ID: user.ID.String()}
+	s.tokenManager.EXPECT().GenerateAccess(tokenClaims).Return(accessToken, true)
+	s.tokenManager.EXPECT().GenerateRefresh(tokenClaims).Return(refreshToken, true)
+
+	s.authRepo.EXPECT().Create(gomock.Any(), refreshToken).Return(nil)
+
+	token, err := s.ucase.Login(context.Background(), loginInput)
 	s.Nil(err)
+	s.Equal(accessToken, token.Access)
+	s.Equal(refreshToken, token.Refresh)
 }

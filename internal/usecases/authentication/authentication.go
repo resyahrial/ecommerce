@@ -48,5 +48,25 @@ func (u *AuthenticationUsecase) Login(ctx context.Context, input authentication.
 		return
 	}
 
+	tokenClaims := tokenmanager.Claims{
+		ID: user.ID.String(),
+	}
+
+	accessToken, _ := u.tokenManager.GenerateAccess(tokenClaims)
+	refreshToken, _ := u.tokenManager.GenerateRefresh(tokenClaims)
+	if accessToken == "" || refreshToken == "" {
+		err = exceptions.AuthFailed
+		return
+	}
+
+	token = authentication.Token{
+		Access:  accessToken,
+		Refresh: refreshToken,
+	}
+
+	if err = u.authRepo.Create(newCtx, token.Refresh); err != nil {
+		return
+	}
+
 	return
 }

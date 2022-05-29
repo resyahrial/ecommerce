@@ -12,12 +12,19 @@ func (e *E) InitAuthErr() {
 		"Auth",
 
 		// 4XX
+		AuthFailed,
 		AuthInvalidInput,
 		AuthInvalidInputValidation,
 		AuthNotAuthorized,
 		AuthForbidden,
 		AuthForbiddenRole,
 	)
+}
+
+var AuthFailed = &gexception.Exception{
+	HttpStatus:  http.StatusBadRequest,
+	Code:        "Failed",
+	Description: "authentication failed",
 }
 
 var AuthInvalidInput = &gexception.Exception{
