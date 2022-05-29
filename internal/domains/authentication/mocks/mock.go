@@ -5,6 +5,9 @@
 package mock_authentication
 
 import (
+	context "context"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -29,4 +32,18 @@ func NewMockAuthenticationRepo(ctrl *gomock.Controller) *MockAuthenticationRepo 
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockAuthenticationRepo) EXPECT() *MockAuthenticationRepoMockRecorder {
 	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockAuthenticationRepo) Create(ctx context.Context, refreshToken string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, refreshToken)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockAuthenticationRepoMockRecorder) Create(ctx, refreshToken interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAuthenticationRepo)(nil).Create), ctx, refreshToken)
 }
