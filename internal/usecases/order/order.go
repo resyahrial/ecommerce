@@ -3,10 +3,13 @@ package order
 import (
 	"context"
 
+	"github.com/mitchellh/mapstructure"
 	order_dom "github.com/resyahrial/go-commerce/internal/domains/order"
 	product_dom "github.com/resyahrial/go-commerce/internal/domains/product"
+	user_dom "github.com/resyahrial/go-commerce/internal/domains/user"
+	"github.com/resyahrial/go-commerce/internal/exceptions"
 	"github.com/resyahrial/go-commerce/pkg/gtrace"
-	"github.com/resyahrial/go-commerce/pkg/inspect"
+	"github.com/resyahrial/go-commerce/pkg/gvalidator"
 	"github.com/segmentio/ksuid"
 )
 
@@ -17,12 +20,21 @@ type OrderUsecaseInterface interface {
 type GetListParams struct {
 	Page   int
 	Limit  int
-	UserId ksuid.KSUID
-	Role   string
+	UserId ksuid.KSUID `validate:"required"`
+	Role   string      `validate:"required,oneof=BUYER SELLER"`
 }
 
-func (p GetListParams) ToRepoParams() {
+func (p GetListParams) Validate() (string, bool) {
+	return gvalidator.Validate(p)
+}
 
+func (p GetListParams) ToRepoParams() (repoParams order_dom.GetListParams, err error) {
+	if err = mapstructure.Decode(p, &repoParams); err != nil {
+		return
+	}
+
+	repoParams.IsBuyer = p.Role == user_dom.BUYER
+	return
 }
 
 type OrderUsecase struct {
@@ -41,6 +53,16 @@ func (u *OrderUsecase) GetList(ctx context.Context, params GetListParams) (order
 	newCtx, span := gtrace.Start(ctx)
 	defer gtrace.End(span, err)
 
-	inspect.Do(newCtx)
-	return
+	var repoParams order_dom.GetListParams
+
+	if errDesc, ok := params.Validate(); !ok {
+		err = exceptions.OrderInvalidInputValidation.New(errDesc)
+		return
+	}
+
+	if repoParams, err = params.ToRepoParams(); err != nil {
+		return
+	}
+
+	return u.orderRepo.GetList(newCtx, repoParams)
 }
