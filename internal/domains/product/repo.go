@@ -13,7 +13,8 @@ type ProductRepo interface {
 }
 
 type GetListParams struct {
-	Page     int
-	Limit    int
-	SellerId ksuid.KSUID
+	Page          int
+	Limit         int
+	SellerId      ksuid.KSUID
+	PreloadSeller bool
 }

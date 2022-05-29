@@ -19,6 +19,15 @@ type GetListParams struct {
 	SellerId ksuid.KSUID
 }
 
+func (p GetListParams) ToRepoParams() (repoParams product_dom.GetListParams, err error) {
+	if err = mapstructure.Decode(p, &repoParams); err != nil {
+		return
+	}
+
+	repoParams.PreloadSeller = repoParams.SellerId.IsNil()
+	return
+}
+
 type ProductUsecase struct {
 	productRepo product_dom.ProductRepo
 }
@@ -34,7 +43,7 @@ func (u *ProductUsecase) GetList(ctx context.Context, params GetListParams) (pro
 	defer gtrace.End(span, err)
 
 	var repoParams product_dom.GetListParams
-	if err = mapstructure.Decode(params, &repoParams); err != nil {
+	if repoParams, err = params.ToRepoParams(); err != nil {
 		return
 	}
 
