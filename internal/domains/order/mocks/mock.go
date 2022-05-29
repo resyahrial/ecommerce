@@ -5,7 +5,11 @@
 package mock_order
 
 import (
+	context "context"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
+	order "github.com/resyahrial/go-commerce/internal/domains/order"
 )
 
 // MockOrderRepo is a mock of OrderRepo interface.
@@ -29,4 +33,35 @@ func NewMockOrderRepo(ctrl *gomock.Controller) *MockOrderRepo {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockOrderRepo) EXPECT() *MockOrderRepoMockRecorder {
 	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockOrderRepo) Create(ctx context.Context, input order.Order) (order.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, input)
+	ret0, _ := ret[0].(order.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockOrderRepoMockRecorder) Create(ctx, input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOrderRepo)(nil).Create), ctx, input)
+}
+
+// GetList mocks base method.
+func (m *MockOrderRepo) GetList(ctx context.Context, params order.GetListParams) ([]order.Order, int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetList", ctx, params)
+	ret0, _ := ret[0].([]order.Order)
+	ret1, _ := ret[1].(int64)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetList indicates an expected call of GetList.
+func (mr *MockOrderRepoMockRecorder) GetList(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetList", reflect.TypeOf((*MockOrderRepo)(nil).GetList), ctx, params)
 }
