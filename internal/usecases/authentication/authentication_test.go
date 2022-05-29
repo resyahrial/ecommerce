@@ -2,6 +2,7 @@ package authentication_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -40,7 +41,6 @@ func (s *authenticationUsecaseSuite) SetupTest() {
 }
 
 func (s *authenticationUsecaseSuite) TestLogin_Success() {
-	hashedPassword := "hashedPassword"
 	accessToken := "accessToken"
 	refreshToken := "refreshToken"
 
@@ -52,14 +52,14 @@ func (s *authenticationUsecaseSuite) TestLogin_Success() {
 	user := user_dom.User{
 		ID:       ksuid.New(),
 		Email:    loginInput.Email,
-		Password: hashedPassword,
+		Password: "hashedPassword",
 	}
 
 	s.userRepo.EXPECT().GetDetail(gomock.Any(), user_dom.User{
 		Email: loginInput.Email,
 	}).Return(user, nil)
 
-	s.hashHandler.EXPECT().Compare(loginInput.Password, hashedPassword).Return(true)
+	s.hashHandler.EXPECT().Compare(loginInput.Password, user.Password).Return(true)
 
 	tokenClaims := tokenmanager.Claims{ID: user.ID.String()}
 	s.tokenManager.EXPECT().GenerateAccess(tokenClaims).Return(accessToken, true)
@@ -71,4 +71,105 @@ func (s *authenticationUsecaseSuite) TestLogin_Success() {
 	s.Nil(err)
 	s.Equal(accessToken, token.Access)
 	s.Equal(refreshToken, token.Refresh)
+}
+
+func (s *authenticationUsecaseSuite) TestLogin_FailedInputValidation() {
+	loginInput := auth_dom.Login{
+		Email:    "email",
+		Password: "qwerty",
+	}
+
+	_, err := s.ucase.Login(context.Background(), loginInput)
+	s.NotNil(err)
+}
+
+func (s *authenticationUsecaseSuite) TestLogin_FailedUserNotFound() {
+	loginInput := auth_dom.Login{
+		Email:    "email@email.com",
+		Password: "qwerty",
+	}
+
+	s.userRepo.EXPECT().GetDetail(gomock.Any(), user_dom.User{
+		Email: loginInput.Email,
+	}).Return(user_dom.User{}, errors.New("error"))
+
+	_, err := s.ucase.Login(context.Background(), loginInput)
+	s.NotNil(err)
+}
+
+func (s *authenticationUsecaseSuite) TestLogin_FailedPasswordNotMatch() {
+	loginInput := auth_dom.Login{
+		Email:    "email@email.com",
+		Password: "invalidPassword",
+	}
+
+	user := user_dom.User{
+		ID:       ksuid.New(),
+		Email:    loginInput.Email,
+		Password: "hashedPassword",
+	}
+
+	s.userRepo.EXPECT().GetDetail(gomock.Any(), user_dom.User{
+		Email: loginInput.Email,
+	}).Return(user, nil)
+
+	s.hashHandler.EXPECT().Compare(loginInput.Password, user.Password).Return(false)
+
+	_, err := s.ucase.Login(context.Background(), loginInput)
+	s.NotNil(err)
+}
+
+func (s *authenticationUsecaseSuite) TestLogin_FailedGenerateToken() {
+
+	loginInput := auth_dom.Login{
+		Email:    "email@email.com",
+		Password: "qwerty",
+	}
+
+	user := user_dom.User{
+		ID:       ksuid.New(),
+		Email:    loginInput.Email,
+		Password: "hashedPassword",
+	}
+
+	s.userRepo.EXPECT().GetDetail(gomock.Any(), user_dom.User{
+		Email: loginInput.Email,
+	}).Return(user, nil)
+
+	s.hashHandler.EXPECT().Compare(loginInput.Password, user.Password).Return(true)
+
+	tokenClaims := tokenmanager.Claims{ID: user.ID.String()}
+	s.tokenManager.EXPECT().GenerateAccess(tokenClaims).Return("", false)
+	s.tokenManager.EXPECT().GenerateRefresh(tokenClaims).Return("refreshToken", true)
+
+	_, err := s.ucase.Login(context.Background(), loginInput)
+	s.NotNil(err)
+}
+
+func (s *authenticationUsecaseSuite) TestLogin_FailedSaveToken() {
+	loginInput := auth_dom.Login{
+		Email:    "email@email.com",
+		Password: "qwerty",
+	}
+
+	user := user_dom.User{
+		ID:       ksuid.New(),
+		Email:    loginInput.Email,
+		Password: "hashedPassword",
+	}
+
+	s.userRepo.EXPECT().GetDetail(gomock.Any(), user_dom.User{
+		Email: loginInput.Email,
+	}).Return(user, nil)
+
+	s.hashHandler.EXPECT().Compare(loginInput.Password, user.Password).Return(true)
+
+	tokenClaims := tokenmanager.Claims{ID: user.ID.String()}
+	s.tokenManager.EXPECT().GenerateAccess(tokenClaims).Return("accessToken", true)
+	s.tokenManager.EXPECT().GenerateRefresh(tokenClaims).Return("refreshToken", true)
+
+	s.authRepo.EXPECT().Create(gomock.Any(), "refreshToken").Return(errors.New("error"))
+
+	_, err := s.ucase.Login(context.Background(), loginInput)
+	s.NotNil(err)
 }
