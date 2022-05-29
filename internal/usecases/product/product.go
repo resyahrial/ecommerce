@@ -5,6 +5,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	product_dom "github.com/resyahrial/go-commerce/internal/domains/product"
+	"github.com/resyahrial/go-commerce/internal/exceptions"
 	"github.com/resyahrial/go-commerce/pkg/gtrace"
 	"github.com/segmentio/ksuid"
 )
@@ -56,6 +57,11 @@ func (u *ProductUsecase) GetList(ctx context.Context, params GetListParams) (pro
 func (u *ProductUsecase) Create(ctx context.Context, product product_dom.Product) (res product_dom.Product, err error) {
 	newCtx, span := gtrace.Start(ctx)
 	defer gtrace.End(span, err)
+
+	if errDesc, ok := product.Validate(); !ok {
+		err = exceptions.ProductInvalidInputValidation.New(errDesc)
+		return
+	}
 
 	return u.productRepo.Create(newCtx, product)
 }
