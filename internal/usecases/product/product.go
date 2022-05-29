@@ -24,6 +24,8 @@ func (p GetListParams) ToRepoParams() (repoParams product_dom.GetListParams, err
 		return
 	}
 
+	// seller id existence means, seller want to see their products,
+	// so, no need to show them their own detail
 	repoParams.PreloadSeller = repoParams.SellerId.IsNil()
 	return
 }
