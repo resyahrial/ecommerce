@@ -10,12 +10,14 @@ import (
 	"github.com/resyahrial/go-commerce/internal/exceptions"
 	"github.com/resyahrial/go-commerce/pkg/gtrace"
 	"github.com/resyahrial/go-commerce/pkg/gvalidator"
+	"github.com/resyahrial/go-commerce/pkg/inspect"
 	"github.com/segmentio/ksuid"
 )
 
 type OrderUsecaseInterface interface {
 	GetList(ctx context.Context, params GetListParams) ([]order_dom.Order, int64, error)
 	Create(ctx context.Context, order order_dom.Order) ([]order_dom.Order, error)
+	Update(ctx context.Context, order order_dom.Order) (order_dom.Order, error)
 }
 
 type GetListParams struct {
@@ -120,4 +122,13 @@ func (u *OrderUsecase) Create(ctx context.Context, order order_dom.Order) (order
 	}
 
 	return u.orderRepo.BulkCreate(newCtx, orders)
+}
+
+func (u *OrderUsecase) Update(ctx context.Context, order order_dom.Order) (res order_dom.Order, err error) {
+	newCtx, span := gtrace.Start(ctx)
+	defer gtrace.End(span, err)
+
+	inspect.Do(newCtx)
+
+	return
 }
