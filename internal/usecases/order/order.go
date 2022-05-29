@@ -15,7 +15,7 @@ import (
 
 type OrderUsecaseInterface interface {
 	GetList(ctx context.Context, params GetListParams) ([]order_dom.Order, int64, error)
-	Create(ctx context.Context, buyerId ksuid.KSUID, order order_dom.Order) ([]order_dom.Order, error)
+	Create(ctx context.Context, order order_dom.Order) ([]order_dom.Order, error)
 }
 
 type GetListParams struct {
@@ -68,19 +68,23 @@ func (u *OrderUsecase) GetList(ctx context.Context, params GetListParams) (order
 	return u.orderRepo.GetList(newCtx, repoParams)
 }
 
-func (u *OrderUsecase) Create(ctx context.Context, buyerId ksuid.KSUID, order order_dom.Order) (orders []order_dom.Order, err error) {
+func (u *OrderUsecase) Create(ctx context.Context, order order_dom.Order) (orders []order_dom.Order, err error) {
 	newCtx, span := gtrace.Start(ctx)
 	defer gtrace.Error(span, err)
 
 	var productKsuids []ksuid.KSUID
 	var products []product_dom.Product
 	var productCount int64
-	sellerOrderItemMap := make(map[ksuid.KSUID][]order_dom.OrderItem)
+	sellerOrderItemMap := make(map[user_dom.Seller][]order_dom.OrderItem)
 	ksuidQuantityMap := make(map[ksuid.KSUID]int64)
 
 	for _, orderItem := range order.Items {
-		productKsuids = append(productKsuids, orderItem.ProductId)
-		ksuidQuantityMap[orderItem.ProductId] = orderItem.Quantity
+		if ksuidQuantityMap[orderItem.ProductId] == 0 {
+			productKsuids = append(productKsuids, orderItem.ProductId)
+			ksuidQuantityMap[orderItem.ProductId] = orderItem.Quantity
+		} else {
+			ksuidQuantityMap[orderItem.ProductId] += orderItem.Quantity
+		}
 	}
 
 	if products, productCount, err = u.productRepo.GetList(newCtx, product_dom.GetListParams{
@@ -95,8 +99,8 @@ func (u *OrderUsecase) Create(ctx context.Context, buyerId ksuid.KSUID, order or
 	}
 
 	for _, product := range products {
-		sellerOrderItemMap[product.Seller.ID] = append(
-			sellerOrderItemMap[product.Seller.ID],
+		sellerOrderItemMap[product.Seller] = append(
+			sellerOrderItemMap[product.Seller],
 			order_dom.OrderItem{
 				ProductId: product.ID,
 				Quantity:  ksuidQuantityMap[product.ID],
@@ -105,13 +109,12 @@ func (u *OrderUsecase) Create(ctx context.Context, buyerId ksuid.KSUID, order or
 		)
 	}
 
-	for sellerId, items := range sellerOrderItemMap {
+	for seller, items := range sellerOrderItemMap {
 		orders = append(orders, order_dom.Order{
-			BuyerId:                    buyerId,
-			SellerId:                   sellerId,
-			DeliverySourceAddress:      order.DeliverySourceAddress,
+			BuyerId:                    order.BuyerId,
+			SellerId:                   seller.ID,
+			DeliverySourceAddress:      seller.Address,
 			DeliveryDestinationAddress: order.DeliveryDestinationAddress,
-			Status:                     order_dom.PENDING,
 			Items:                      items,
 		})
 	}
