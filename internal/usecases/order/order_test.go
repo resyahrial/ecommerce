@@ -250,5 +250,4 @@ func (s *orderUsecaseSuite) TestUpdate_Success() {
 	s.Nil(err)
 	s.Equal(orderId, orderRes.ID)
 	s.Equal(input.Status, orderRes.Status)
-
 }

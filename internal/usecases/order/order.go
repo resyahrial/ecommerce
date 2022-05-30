@@ -127,5 +127,10 @@ func (u *OrderUsecase) Update(ctx context.Context, orderId ksuid.KSUID, input or
 	newCtx, span := gtrace.Start(ctx)
 	defer gtrace.End(span, err)
 
+	if errDesc, ok := input.Validate(); !ok {
+		err = exceptions.OrderInvalidInputValidation.New(errDesc)
+		return
+	}
+
 	return u.orderRepo.Update(newCtx, orderId, input)
 }

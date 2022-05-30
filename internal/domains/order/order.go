@@ -3,6 +3,7 @@ package order
 import (
 	"github.com/resyahrial/go-commerce/internal/domains/product"
 	"github.com/resyahrial/go-commerce/internal/domains/user"
+	"github.com/resyahrial/go-commerce/pkg/gvalidator"
 	"github.com/segmentio/ksuid"
 )
 
@@ -18,10 +19,14 @@ type Order struct {
 	DeliverySourceAddress      string      `json:"deliverySourceAddress" mapstructure:",omitempty"`
 	DeliveryDestinationAddress string      `json:"deliveryDestinationAddress" mapstructure:",omitempty"`
 	TotalPrice                 float64     `json:"totalPrice" mapstructure:"-"`
-	Status                     string      `json:"status" mapstructure:",omitempty"`
-	Buyer                      user.Buyer  `json:"buyer" mapstructure:"-"`
-	Seller                     user.Seller `json:"seller" mapstructure:"-"`
-	Items                      []OrderItem `json:"items" mapstructure:",omitempty"`
+	Status                     string      `json:"status" mapstructure:",omitempty" validate:"omitempty,oneof=PENDING ACCEPTED"`
+	Buyer                      user.Buyer  `json:"buyer" mapstructure:"-" validate:"-"`
+	Seller                     user.Seller `json:"seller" mapstructure:"-" validate:"-"`
+	Items                      []OrderItem `json:"items" mapstructure:",omitempty" validate:"-"`
+}
+
+func (o Order) Validate() (string, bool) {
+	return gvalidator.Validate(o)
 }
 
 type OrderItem struct {
