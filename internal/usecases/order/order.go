@@ -16,6 +16,7 @@ import (
 type OrderUsecaseInterface interface {
 	GetList(ctx context.Context, params GetListParams) ([]order_dom.Order, int64, error)
 	Create(ctx context.Context, order order_dom.Order) ([]order_dom.Order, error)
+	Update(ctx context.Context, orderId ksuid.KSUID, order order_dom.Order) (order_dom.Order, error)
 }
 
 type GetListParams struct {
@@ -120,4 +121,16 @@ func (u *OrderUsecase) Create(ctx context.Context, order order_dom.Order) (order
 	}
 
 	return u.orderRepo.BulkCreate(newCtx, orders)
+}
+
+func (u *OrderUsecase) Update(ctx context.Context, orderId ksuid.KSUID, input order_dom.Order) (res order_dom.Order, err error) {
+	newCtx, span := gtrace.Start(ctx)
+	defer gtrace.End(span, err)
+
+	if errDesc, ok := input.Validate(); !ok {
+		err = exceptions.OrderInvalidInputValidation.New(errDesc)
+		return
+	}
+
+	return u.orderRepo.Update(newCtx, orderId, input)
 }
