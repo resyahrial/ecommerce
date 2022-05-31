@@ -18,8 +18,9 @@ type Order struct {
 	DeliveryDestinationAddress string      `json:"deliveryDestinationAddress"`
 	TotalPrice                 float64     `json:"totalPrice"`
 	Status                     string      `json:"status"`
-	Buyer                      User        `json:"buyer" gorm:"foreignKey:UserId;references:BuyerId;OnDelete:SET NULL"  validate:"-"`
-	Seller                     User        `json:"seller" gorm:"foreignKey:UserId;references:SellerId;OnDelete:SET NULL" validate:"-"`
+	Buyer                      User        `json:"buyer" gorm:"foreignKey:BuyerId;references:ID;OnDelete:SET NULL"  validate:"-"`
+	Seller                     User        `json:"seller" gorm:"foreignKey:SellerID;references:ID;OnDelete:SET NULL" validate:"-"`
+	Items                      []OrderItem `json:"items" gorm:"foreignKey:OrderId;references:ID;OnDelete:SET NULL" validate:"-"`
 }
 
 func (o *Order) BeforeCreate(tx *gorm.DB) (err error) {

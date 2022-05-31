@@ -8,7 +8,7 @@ import (
 )
 
 type Product struct {
-	ID          ksuid.KSUID `json:"ID" gorm:"primaryKey;type:varchar(30)"`
+	ID          ksuid.KSUID `json:"id" gorm:"primaryKey;type:varchar(30)"`
 	SellerId    ksuid.KSUID `json:"sellerId" gorm:"index;type:varchar(30)"`
 	InsertedAt  time.Time   `json:"insertedAt" gorm:"autoCreateTime"`
 	UpdatedAt   time.Time   `json:"updatedAt" gorm:"autoUpdateTime"`
@@ -16,7 +16,7 @@ type Product struct {
 	Name        string      `json:"name"`
 	Description string      `json:"description"`
 	Price       float64     `json:"price"`
-	User        User        `json:"-" gorm:"foreignKey:UserId;references:SellerId;OnDelete:SET NULL" mapstructure:"-" validate:"-"`
+	User        User        `json:"-" gorm:"foreignKey:SellerId;references:ID;OnDelete:SET NULL" mapstructure:"-" validate:"-"`
 }
 
 func (p *Product) BeforeCreate(tx *gorm.DB) (err error) {
