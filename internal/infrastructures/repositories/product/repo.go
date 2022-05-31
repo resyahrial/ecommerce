@@ -3,7 +3,9 @@ package product
 import (
 	"context"
 
+	"github.com/mitchellh/mapstructure"
 	product_dom "github.com/resyahrial/go-commerce/internal/domains/product"
+	"github.com/resyahrial/go-commerce/internal/infrastructures/repositories/models"
 	"github.com/resyahrial/go-commerce/pkg/gtrace"
 	"github.com/resyahrial/go-commerce/pkg/inspect"
 	"gorm.io/gorm"
@@ -30,7 +32,18 @@ func (r *ProductRepoPg) Create(ctx context.Context, input product_dom.Product) (
 	newCtx, span := gtrace.Start(ctx)
 	defer gtrace.End(span, err)
 
-	inspect.Do(newCtx)
+	var dataProduct models.Product
+	if err = mapstructure.Decode(input, &dataProduct); err != nil {
+		return
+	}
+
+	if err = r.db.WithContext(newCtx).Create(&dataProduct).Error; err != nil {
+		return
+	}
+
+	if err = mapstructure.Decode(dataProduct, &res); err != nil {
+		return
+	}
 
 	return
 }

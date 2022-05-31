@@ -16,7 +16,7 @@ type Product struct {
 	Name        string      `json:"name"`
 	Description string      `json:"description"`
 	Price       float64     `json:"price"`
-	User        User        `json:"-" gorm:"foreignKey:UserId;references:SellerId;OnDelete:SET NULL" validate:"-"`
+	User        User        `json:"-" gorm:"foreignKey:UserId;references:SellerId;OnDelete:SET NULL" mapstructure:"-" validate:"-"`
 }
 
 func (p *Product) BeforeCreate(tx *gorm.DB) (err error) {

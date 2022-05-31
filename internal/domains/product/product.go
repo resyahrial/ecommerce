@@ -12,7 +12,7 @@ type Product struct {
 	Description string      `json:"description" validate:"required"`
 	Price       float64     `json:"price" validate:"required,gte=0"`
 	SellerId    ksuid.KSUID `json:"sellerId" validate:"required"`
-	Seller      user.Seller `json:"seller" validate:"-"`
+	Seller      user.Seller `json:"seller" mapstructure:"-" validate:"-"`
 }
 
 func (p Product) Validate() (string, bool) {
