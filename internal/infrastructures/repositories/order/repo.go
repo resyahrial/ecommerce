@@ -96,7 +96,22 @@ func (r *OrderRepoPg) BulkCreate(ctx context.Context, inputs []order_dom.Order) 
 	newCtx, span := gtrace.Start(ctx)
 	defer gtrace.End(span, err)
 
-	inspect.Do(newCtx)
+	var dataOrders []models.Order
+	if err = mapstructure.Decode(inputs, &dataOrders); err != nil {
+		return
+	}
+
+	if err = r.db.WithContext(newCtx).Create(&dataOrders).Error; err != nil {
+		return
+	}
+
+	for _, o := range dataOrders {
+		var orderDomain order_dom.Order
+		if orderDomain, err = r.castDataModelsToDomain(newCtx, o); err != nil {
+			return
+		}
+		res = append(res, orderDomain)
+	}
 
 	return
 }
