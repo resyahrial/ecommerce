@@ -76,7 +76,18 @@ func (r *OrderRepoPg) Create(ctx context.Context, input order_dom.Order) (res or
 	newCtx, span := gtrace.Start(ctx)
 	defer gtrace.End(span, err)
 
-	inspect.Do(newCtx)
+	var dataOrder models.Order
+	if err = mapstructure.Decode(input, &dataOrder); err != nil {
+		return
+	}
+
+	if err = r.db.WithContext(newCtx).Create(&dataOrder).Error; err != nil {
+		return
+	}
+
+	if res, err = r.castDataModelsToDomain(newCtx, dataOrder); err != nil {
+		return
+	}
 
 	return
 }
