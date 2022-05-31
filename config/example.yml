@@ -1,0 +1,11 @@
+# Database credentials
+database:
+  user: ""
+  pass: ""
+  host: ""
+  db: ""
+  port: 5432
+  loglevel: 4 # 1 (silent) - 4 (info)
+  maxidlecon: 10
+  maxopencon: 100
+  conmaxlifetime: 3600 # in seconds
