@@ -7,6 +7,7 @@ import (
 func AutoMigrateAllTables(db *gorm.DB) {
 	if err := db.AutoMigrate(
 		User{},
+		Authentication{},
 	); err != nil {
 		panic(err)
 	}
