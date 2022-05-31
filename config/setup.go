@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/resyahrial/go-commerce/config/app"
+	"github.com/resyahrial/go-commerce/internal/infrastructures/repositories/migrations"
+	"github.com/resyahrial/go-commerce/internal/infrastructures/repositories/models"
 	"github.com/resyahrial/go-commerce/pkg/gtrace"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -78,6 +80,9 @@ func initDb() {
 	sqlDB.SetMaxOpenConns(Config.Db.MaxOpenConns)
 	// SetConnMaxLifetime sets the maximum amount of time a connection may be reused.
 	sqlDB.SetConnMaxLifetime(time.Duration(Config.Db.ConnMaxLifetime) * time.Second)
+
+	migrations.AutoMigration(app.DB)
+	models.AutoMigrateAllTables(app.DB)
 }
 
 func shutdownDB() {
