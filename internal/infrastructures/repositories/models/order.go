@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/segmentio/ksuid"
+	"github.com/thoas/go-funk"
 	"gorm.io/gorm"
 )
 
@@ -27,5 +28,12 @@ func (o *Order) BeforeCreate(tx *gorm.DB) (err error) {
 	if o.ID.IsNil() {
 		o.ID = ksuid.New()
 	}
+	return
+}
+
+func (o *Order) AfterFind(tx *gorm.DB) (err error) {
+	o.TotalPrice = funk.Reduce(o.Items, func(acc float64, item OrderItem) float64 {
+		return acc + (item.Price * float64(item.Quantity))
+	}, 0).(float64)
 	return
 }
