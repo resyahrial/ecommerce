@@ -9,7 +9,6 @@ import (
 	user_dom "github.com/resyahrial/go-commerce/internal/domains/user"
 	"github.com/resyahrial/go-commerce/internal/infrastructures/repositories/models"
 	"github.com/resyahrial/go-commerce/pkg/gtrace"
-	"github.com/resyahrial/go-commerce/pkg/inspect"
 	"github.com/segmentio/ksuid"
 	"github.com/thoas/go-funk"
 	"gorm.io/gorm"
@@ -120,7 +119,18 @@ func (r *OrderRepoPg) Update(ctx context.Context, id ksuid.KSUID, input order_do
 	newCtx, span := gtrace.Start(ctx)
 	defer gtrace.End(span, err)
 
-	inspect.Do(newCtx)
+	var dataOrder models.Order
+	if err = mapstructure.Decode(input, &dataOrder); err != nil {
+		return
+	}
+
+	if err = r.db.WithContext(newCtx).Model(&models.Order{}).Where("ksuid = ?", id).Omit("Buyer", "Seller", "Items").Updates(&dataOrder).Error; err != nil {
+		return
+	}
+
+	if res, err = r.castDataModelsToDomain(newCtx, dataOrder); err != nil {
+		return
+	}
 
 	return
 }

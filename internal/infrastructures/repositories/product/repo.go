@@ -32,7 +32,7 @@ func (r *ProductRepoPg) GetList(ctx context.Context, params product_dom.GetListP
 	values := []interface{}{}
 
 	if params.Ksuids != nil {
-		queries = append(queries, "ksuid IN ?")
+		queries = append(queries, "id IN ?")
 		values = append(values, params.Ksuids)
 	}
 
