@@ -16,13 +16,19 @@ type JwtTokenManager struct {
 	expiryAgeRefresh time.Duration
 }
 
-func NewJwtTokenManager(
-	keyAccess string,
-	keyRefresh string,
-	expiryAgeAccess time.Duration,
-	expiryAgeRefresh time.Duration,
-) TokenManager {
-	return &JwtTokenManager{keyAccess, keyRefresh, expiryAgeAccess, expiryAgeRefresh}
+type JwtTokenManagerOpts struct {
+	KeyAccess        string
+	KeyRefresh       string
+	ExpiryAgeAccess  time.Duration
+	ExpiryAgeRefresh time.Duration
+}
+
+func NewJwtTokenManager(opts JwtTokenManagerOpts) TokenManager {
+	return &JwtTokenManager{
+		keyAccess:        opts.KeyAccess,
+		keyRefresh:       opts.KeyRefresh,
+		expiryAgeAccess:  opts.ExpiryAgeAccess,
+		expiryAgeRefresh: opts.ExpiryAgeRefresh}
 }
 
 func (t *JwtTokenManager) GenerateAccess(claims Claims) (string, bool) {
