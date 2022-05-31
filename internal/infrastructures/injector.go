@@ -33,7 +33,7 @@ func InitProductUsecase(db *gorm.DB) product_ucase.ProductUsecaseInterface {
 	return nil
 }
 
-func InitProductUsecase(db *gorm.DB) order_ucase.OrderUsecaseInterface {
+func InitOrderUsecase(db *gorm.DB) order_ucase.OrderUsecaseInterface {
 	wire.Build(order_repo.New, product_repo.New, order_ucase.New)
 	return nil
 }
