@@ -9,6 +9,7 @@ func AutoMigrateAllTables(db *gorm.DB) {
 		User{},
 		Authentication{},
 		Product{},
+		Order{},
 	); err != nil {
 		panic(err)
 	}

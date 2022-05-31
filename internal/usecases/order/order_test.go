@@ -22,7 +22,7 @@ type orderUsecaseSuite struct {
 	ucase       order.OrderUsecaseInterface
 }
 
-func TestProductUsecase(t *testing.T) {
+func TestOrderUsecase(t *testing.T) {
 	suite.Run(t, new(orderUsecaseSuite))
 }
 
