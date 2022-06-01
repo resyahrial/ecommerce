@@ -2,10 +2,12 @@ package order
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 	order_dom "github.com/resyahrial/go-commerce/internal/domains/order"
 	order_ucase "github.com/resyahrial/go-commerce/internal/usecases/order"
+	"github.com/resyahrial/go-commerce/pkg/gctx"
 	"github.com/resyahrial/go-commerce/pkg/grest"
 	"github.com/resyahrial/go-commerce/pkg/gtrace"
 	"github.com/segmentio/ksuid"
@@ -49,7 +51,43 @@ func (h *OrderHandler) Create(w http.ResponseWriter, r *http.Request, p httprout
 }
 
 func (h *OrderHandler) ViewList(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var err error
+	var params order_ucase.GetListParams
+	var orders []order_dom.Order
+	var count int64
 
+	newCtx, span := gtrace.Start(r.Context())
+	defer gtrace.End(span, err)
+
+	actor, _ := gctx.GetActor(newCtx)
+	params.UserId = actor.ID
+	params.Role = actor.Role
+
+	queries := r.URL.Query()
+	if page := queries.Get("page"); page != "" {
+		if params.Page, err = strconv.Atoi(page); err != nil {
+			panic(err)
+		}
+	}
+
+	if limit := queries.Get("limit"); limit != "" {
+		if params.Limit, err = strconv.Atoi(limit); err != nil {
+			panic(err)
+		}
+	}
+
+	if orders, count, err = h.orderUcase.GetList(newCtx, params); err != nil {
+		panic(err)
+	}
+
+	grest.WriteResponse(w, grest.Response{
+		Code:   http.StatusOK,
+		Status: "OK",
+		Data: map[string]interface{}{
+			"count":  count,
+			"orders": orders,
+		},
+	})
 }
 
 func (h *OrderHandler) Accept(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
