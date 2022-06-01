@@ -3,11 +3,9 @@ package authentication
 import (
 	"github.com/resyahrial/go-commerce/config/app"
 	"github.com/resyahrial/go-commerce/internal/infrastructures"
-	"github.com/resyahrial/go-commerce/internal/infrastructures/http"
+	"github.com/resyahrial/go-commerce/pkg/groute"
 	tokenmanager "github.com/resyahrial/go-commerce/pkg/token-manager"
 )
-
-var handler AuthenticationHandlerInterface
 
 func init() {
 	handler = New(infrastructures.InitAuthenticationUsecase(
@@ -19,11 +17,16 @@ func init() {
 			ExpiryAgeRefresh: app.ExpiryAgeRefresh,
 		},
 	))
+
+	groute.RegisterRoute(
+		"/authentications",
+		LoginApi,
+	)
 }
 
-var AuthenticationApi []http.Route = []http.Route{
-	{
-		Path:    "/login",
-		Handler: handler.Login,
-	},
+var handler AuthenticationHandlerInterface
+
+var LoginApi = &groute.Route{
+	Path:    "/login",
+	Handler: handler.Login,
 }
