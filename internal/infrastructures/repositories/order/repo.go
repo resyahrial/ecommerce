@@ -124,7 +124,7 @@ func (r *OrderRepoPg) Update(ctx context.Context, id ksuid.KSUID, input order_do
 		return
 	}
 
-	if err = r.db.WithContext(newCtx).Model(&models.Order{}).Where("ksuid = ?", id).Omit("Buyer", "Seller", "Items").Updates(&dataOrder).Error; err != nil {
+	if err = r.db.WithContext(newCtx).Model(&models.Order{}).Where("id = ?", id).Omit("Buyer", "Seller", "Items").Updates(&dataOrder).Error; err != nil {
 		return
 	}
 
