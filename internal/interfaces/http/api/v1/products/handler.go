@@ -37,6 +37,9 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request, p httpro
 		panic(err)
 	}
 
+	actor, _ := gctx.GetActor(newCtx)
+	prod.SellerId = actor.ID
+
 	if prod, err = h.productUcase.Create(newCtx, prod); err != nil {
 		panic(err)
 	}
