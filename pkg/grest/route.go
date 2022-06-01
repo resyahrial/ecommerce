@@ -19,8 +19,8 @@ type Route struct {
 func RegisterRoute(routes map[string]Route, prefixPath string, as ...*Route) {
 	for _, a := range as {
 		a.Prefix = prefixPath
-		key := a.Prefix + a.Path
-		if _, result := routes[key+a.Method]; result {
+		key := a.Prefix + a.Path + a.Method
+		if _, result := routes[key]; result {
 			log.Error(routes[key])
 			panic("duplicate api definition: " + key)
 		}
