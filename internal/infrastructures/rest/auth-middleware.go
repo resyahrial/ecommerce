@@ -3,6 +3,7 @@ package rest
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/mitchellh/mapstructure"
@@ -46,6 +47,7 @@ func (m *AuthMiddleware) Wrap(nextHandler httprouter.Handle) httprouter.Handle {
 		defer gtrace.End(span, err)
 
 		token := r.Header.Get("authorization")
+		token = strings.Replace(token, "Bearer ", "", len("Bearer "))
 		if userLogin, err = m.tokenValidation(newCtx, token); err != nil {
 			panic(err)
 		}

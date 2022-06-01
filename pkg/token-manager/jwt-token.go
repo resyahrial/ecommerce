@@ -92,7 +92,7 @@ func (t *JwtTokenManager) parse(key []byte, tokenString string) (claims Claims, 
 		return
 	}
 
-	if token.Valid {
+	if !token.Valid {
 		err = fmt.Errorf("invalid token")
 		return
 	} else if ve, ok := err.(*jwt.ValidationError); ok {
