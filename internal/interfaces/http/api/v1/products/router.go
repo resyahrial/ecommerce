@@ -31,10 +31,9 @@ func Register(routes map[string]grest.Route) {
 			Role:       user_dom.SELLER,
 		},
 		&grest.Route{
-			Path:       "/buyer",
-			Method:     http.MethodGet,
-			Handler:    handler.ViewList,
-			IsNeedAuth: true,
+			Path:    "/buyer",
+			Method:  http.MethodGet,
+			Handler: handler.ViewList,
 		},
 	)
 }
