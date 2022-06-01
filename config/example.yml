@@ -1,5 +1,5 @@
 # Database credentials
-database:
+db:
   user: ""
   pass: ""
   host: ""
@@ -9,3 +9,15 @@ database:
   maxidlecon: 10
   maxopencon: 100
   conmaxlifetime: 3600 # in seconds
+
+# JWT
+jwt:
+  keyaccess: ""
+  keyrefresh: ""
+  expiryageaccess:
+    value: 0
+    unit: "hour" # hour, minute, or second
+  expiryagerefresh:
+    value: 0
+    unit: "hour" # hour, minute, or second
+

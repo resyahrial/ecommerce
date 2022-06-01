@@ -13,4 +13,16 @@ type Configuration struct {
 		MaxOpenConns    int `yaml:"maxopencon"`
 		ConnMaxLifetime int `yaml:"conmaxlifetime"`
 	} `yaml:"db"`
+	Jwt struct {
+		KeyAccess       string `yaml:"keyaccess"`
+		KeyRefresh      string `yaml:"keyrefresh"`
+		ExpiryAgeAccess struct {
+			Value int    `yaml:"value"`
+			Unit  string `yaml:"unit"`
+		} `yaml:"expiryageaccess"`
+		ExpiryAgeRefresh struct {
+			Value int    `yaml:"value"`
+			Unit  string `yaml:"unit"`
+		} `yaml:"expiryagerefresh"`
+	} `yaml:"jwt"`
 }

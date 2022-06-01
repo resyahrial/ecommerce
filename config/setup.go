@@ -21,6 +21,7 @@ var Config Configuration
 func Initialize(env string) {
 	setConfig(env)
 	initDb()
+	initTokenManagerOpts()
 }
 
 func Shutdown() {
@@ -83,6 +84,20 @@ func initDb() {
 
 	migrations.AutoMigration(app.DB)
 	models.AutoMigrateAllTables(app.DB)
+}
+
+func initTokenManagerOpts() {
+	timeDurationMap := map[string]time.Duration{
+		"hour":   time.Hour,
+		"minute": time.Minute,
+		"second": time.Second,
+	}
+
+	jwtConfig := Config.Jwt
+	app.KeyAccess = jwtConfig.KeyAccess
+	app.KeyRefresh = jwtConfig.KeyRefresh
+	app.ExpiryAgeAccess = time.Duration(jwtConfig.ExpiryAgeAccess.Value) * timeDurationMap[jwtConfig.ExpiryAgeAccess.Unit]
+	app.ExpiryAgeRefresh = time.Duration(jwtConfig.ExpiryAgeRefresh.Value) * timeDurationMap[jwtConfig.ExpiryAgeRefresh.Unit]
 }
 
 func shutdownDB() {
