@@ -42,13 +42,13 @@ func (r *OrderRepoPg) GetList(ctx context.Context, params order_dom.GetListParam
 		values = append(values, params.UserId)
 	}
 
-	result = result.Preload("Buyer").Preload("Seller").Preload("Items", "order_items.is_deleted <> true").Preload("Items.Product")
+	result = result.Preload("Buyer").Preload("Seller").Preload("Items", "order_items.is_deleted <> true").Preload("Items.Product.User")
 
 	joinedQuery := funk.Reduce(queries, func(acc string, query string) string {
 		return acc + query
 	}, "")
 
-	result = result.Model(&models.Product{}).Where(joinedQuery, values...)
+	result = result.Model(&models.Order{}).Where(joinedQuery, values...)
 
 	if err = result.Count(&count).Error; err != nil {
 		return
@@ -124,7 +124,7 @@ func (r *OrderRepoPg) Update(ctx context.Context, id ksuid.KSUID, input order_do
 		return
 	}
 
-	if err = r.db.WithContext(newCtx).Model(&models.Order{}).Where("ksuid = ?", id).Omit("Buyer", "Seller", "Items").Updates(&dataOrder).Error; err != nil {
+	if err = r.db.WithContext(newCtx).Model(&models.Order{}).Where("id = ?", id).Omit("Buyer", "Seller", "Items").Updates(&dataOrder).Error; err != nil {
 		return
 	}
 
@@ -161,15 +161,24 @@ func (r *OrderRepoPg) castDataModelsToDomain(ctx context.Context, o models.Order
 	for _, item := range o.Items {
 		var orderItem order_dom.OrderItem
 		var productDom product_dom.Product
+		var seller user_dom.User
 		if err = mapstructure.Decode(item, &orderItem); err != nil {
 			return
 		}
 
 		if err = mapstructure.Decode(item.Product, &productDom); err != nil {
 			return
-		} else {
-			orderItem.Product = productDom
 		}
+
+		if err = mapstructure.Decode(item.Product.User, &seller); err != nil {
+			return
+		}
+
+		if s, ok := seller.ToSeller(); ok {
+			productDom.Seller = s
+		}
+
+		orderItem.Product = productDom
 		orderItems = append(orderItems, orderItem)
 	}
 

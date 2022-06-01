@@ -16,7 +16,12 @@ func CreateServer() {
 	authMiddleware := NewAuthMiddleware()
 	roleMiddleware := NewRoleMiddleware()
 
-	for path, route := range api_v1.GetRoute() {
+	for _, route := range api_v1.GetRoute() {
+		path := route.Prefix
+		if route.Path != "/" {
+			path += route.Path
+		}
+
 		handler := route.Handler
 		if route.Role != "" {
 			handler = roleMiddleware.Wrap(handler, route.Role)

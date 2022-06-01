@@ -39,6 +39,9 @@ func (h *OrderHandler) Create(w http.ResponseWriter, r *http.Request, p httprout
 		panic(err)
 	}
 
+	actor, _ := gctx.GetActor(newCtx)
+	input.BuyerId = actor.ID
+
 	if orders, err = h.orderUcase.Create(newCtx, input); err != nil {
 		panic(err)
 	}
