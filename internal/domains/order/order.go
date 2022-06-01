@@ -13,9 +13,9 @@ const (
 )
 
 type Order struct {
-	ID                         ksuid.KSUID `json:"id" mapstructure:"-"`
-	BuyerId                    ksuid.KSUID `json:"buyerId" mapstructure:"-"`
-	SellerId                   ksuid.KSUID `json:"sellerId" mapstructure:"-"`
+	ID                         ksuid.KSUID `json:"id"`
+	BuyerId                    ksuid.KSUID `json:"buyerId"`
+	SellerId                   ksuid.KSUID `json:"sellerId"`
 	DeliverySourceAddress      string      `json:"deliverySourceAddress" mapstructure:",omitempty"`
 	DeliveryDestinationAddress string      `json:"deliveryDestinationAddress" mapstructure:",omitempty"`
 	TotalPrice                 float64     `json:"totalPrice" mapstructure:"-"`
@@ -30,8 +30,8 @@ func (o Order) Validate() (string, bool) {
 }
 
 type OrderItem struct {
-	ID        ksuid.KSUID     `json:"id" mapstructure:"-"`
-	ProductId ksuid.KSUID     `json:"productId" mapstructure:"-"`
+	ID        ksuid.KSUID     `json:"id"`
+	ProductId ksuid.KSUID     `json:"productId"`
 	Quantity  int64           `json:"quantity" mapstructure:",omitempty"`
 	Price     float64         `json:"price" mapstructure:",omitempty"`
 	Product   product.Product `json:"product" mapstructure:"-"`

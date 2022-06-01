@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	order_dom "github.com/resyahrial/go-commerce/internal/domains/order"
 	"github.com/segmentio/ksuid"
 	"github.com/thoas/go-funk"
 	"gorm.io/gorm"
@@ -27,6 +28,10 @@ type Order struct {
 func (o *Order) BeforeCreate(tx *gorm.DB) (err error) {
 	if o.ID.IsNil() {
 		o.ID = ksuid.New()
+	}
+
+	if o.Status == "" {
+		o.Status = order_dom.PENDING
 	}
 	return
 }
