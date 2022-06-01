@@ -3,7 +3,7 @@ package authentication
 import (
 	"github.com/resyahrial/go-commerce/config/app"
 	"github.com/resyahrial/go-commerce/internal/infrastructures"
-	"github.com/resyahrial/go-commerce/pkg/groute"
+	"github.com/resyahrial/go-commerce/pkg/grest"
 	tokenmanager "github.com/resyahrial/go-commerce/pkg/token-manager"
 )
 
@@ -18,7 +18,7 @@ func init() {
 		},
 	))
 
-	groute.RegisterRoute(
+	grest.RegisterRoute(
 		"/authentications",
 		LoginApi,
 	)
@@ -26,7 +26,7 @@ func init() {
 
 var handler AuthenticationHandlerInterface
 
-var LoginApi = &groute.Route{
+var LoginApi = &grest.Route{
 	Path:    "/login",
 	Handler: handler.Login,
 }

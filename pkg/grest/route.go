@@ -1,4 +1,4 @@
-package groute
+package grest
 
 import (
 	"net/http"
