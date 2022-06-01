@@ -41,6 +41,9 @@ func setConfig(env string) {
 		panic(err)
 	}
 
+	app.Host = Config.Http.Host
+	app.Port = Config.Http.Port
+
 	log.SetOutput(os.Stdout)
 }
 

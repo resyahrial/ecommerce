@@ -21,3 +21,7 @@ jwt:
     value: 0
     unit: "hour" # hour, minute, or second
 
+# HTTPServer configurations
+httpserver:
+  host: "localhost"
+  port: 8080

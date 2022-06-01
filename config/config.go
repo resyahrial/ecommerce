@@ -25,4 +25,8 @@ type Configuration struct {
 			Unit  string `yaml:"unit"`
 		} `yaml:"expiryagerefresh"`
 	} `yaml:"jwt"`
+	Http struct {
+		Host string `yaml:"host"`
+		Port string `yaml:"port"`
+	} `yaml:"httpserver"`
 }

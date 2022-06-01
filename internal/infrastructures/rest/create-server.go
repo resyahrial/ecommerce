@@ -1,9 +1,11 @@
 package rest
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/resyahrial/go-commerce/config/app"
 	"github.com/resyahrial/go-commerce/pkg/grest"
 )
 
@@ -15,7 +17,7 @@ func CreateServer(prefix string, routes map[string]grest.Route) {
 	}
 
 	server := http.Server{
-		Addr:    "localhost:3000",
+		Addr:    fmt.Sprintf("%s:%s", app.Host, app.Port),
 		Handler: router,
 	}
 
