@@ -20,7 +20,7 @@ type Order struct {
 	TotalPrice                 float64     `json:"totalPrice"`
 	Status                     string      `json:"status"`
 	Buyer                      User        `json:"buyer" gorm:"foreignKey:BuyerId;references:ID;OnDelete:SET NULL"  validate:"-"`
-	Seller                     User        `json:"seller" gorm:"foreignKey:SellerID;references:ID;OnDelete:SET NULL" validate:"-"`
+	Seller                     User        `json:"seller" gorm:"foreignKey:SellerId;references:ID;OnDelete:SET NULL" validate:"-"`
 	Items                      []OrderItem `json:"items" gorm:"foreignKey:OrderId;references:ID;OnDelete:SET NULL" validate:"-"`
 }
 
