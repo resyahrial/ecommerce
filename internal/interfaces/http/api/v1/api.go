@@ -1,7 +1,8 @@
 package api_v1
 
 import (
-	authentication "github.com/resyahrial/go-commerce/internal/interfaces/http/api/v1/authentications"
+	auth_handler "github.com/resyahrial/go-commerce/internal/interfaces/http/api/v1/authentications"
+	product_handler "github.com/resyahrial/go-commerce/internal/interfaces/http/api/v1/products"
 	"github.com/resyahrial/go-commerce/pkg/grest"
 )
 
@@ -12,7 +13,8 @@ const (
 func GetRoute() map[string]grest.Route {
 	Routes := make(map[string]grest.Route)
 
-	authentication.Register(Routes)
+	auth_handler.Register(Routes)
+	product_handler.Register(Routes)
 
 	return Routes
 }
