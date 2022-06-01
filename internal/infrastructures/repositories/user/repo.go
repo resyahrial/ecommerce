@@ -24,7 +24,7 @@ func (r *UserRepoPg) GetDetail(ctx context.Context, input user_dom.User) (res us
 	defer gtrace.End(span, err)
 
 	var dataUser models.User
-	if err = r.db.WithContext(newCtx).Model(&models.User{}).Where("id = ?", input.ID).First(&dataUser).Error; err != nil {
+	if err = r.db.WithContext(newCtx).Where(input).First(&dataUser).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			err = exceptions.UserNotFound
 		}

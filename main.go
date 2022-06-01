@@ -2,10 +2,13 @@ package main
 
 import (
 	"flag"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/resyahrial/go-commerce/config"
 	"github.com/resyahrial/go-commerce/internal/infrastructures/rest"
-	api_v1 "github.com/resyahrial/go-commerce/internal/interfaces/http/api/v1"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -20,5 +23,17 @@ func main() {
 	config.Initialize(env)
 	defer config.Shutdown()
 
-	rest.CreateServer(api_v1.Prefix, api_v1.Routes)
+	go func() {
+		rest.CreateServer()
+	}()
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	done := make(chan bool, 1)
+	go func() {
+		sig := <-sigs
+		logrus.Warn(sig)
+		done <- true
+	}()
+	<-done
 }

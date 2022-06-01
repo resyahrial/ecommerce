@@ -5,14 +5,14 @@ import (
 	"github.com/resyahrial/go-commerce/pkg/grest"
 )
 
-var Routes map[string]grest.Route
-
 const (
 	Prefix = "/api/v1"
 )
 
-func init() {
-	Routes = make(map[string]grest.Route)
+func GetRoute() map[string]grest.Route {
+	Routes := make(map[string]grest.Route)
 
 	authentication.Register(Routes)
+
+	return Routes
 }

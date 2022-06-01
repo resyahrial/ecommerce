@@ -4,7 +4,7 @@ import "github.com/resyahrial/go-commerce/pkg/gvalidator"
 
 type Login struct {
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"-" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
 func (l Login) Validate() (string, bool) {

@@ -6,15 +6,20 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/resyahrial/go-commerce/config/app"
+	api_v1 "github.com/resyahrial/go-commerce/internal/interfaces/http/api/v1"
+	"github.com/resyahrial/go-commerce/pkg/gexception"
 	"github.com/resyahrial/go-commerce/pkg/grest"
+	"github.com/resyahrial/go-commerce/pkg/inspect"
 )
 
-func CreateServer(prefix string, routes map[string]grest.Route) {
+func CreateServer() {
 	router := httprouter.New()
 
-	for path, route := range routes {
-		router.Handle(route.Method, prefix+path, route.Handler)
+	for path, route := range api_v1.GetRoute() {
+		router.Handle(route.Method, api_v1.Prefix+path, route.Handler)
 	}
+
+	router.PanicHandler = panicHandler
 
 	address := fmt.Sprintf("%s:%s", app.Host, app.Port)
 	server := http.Server{
@@ -26,4 +31,21 @@ func CreateServer(prefix string, routes map[string]grest.Route) {
 	if err := server.ListenAndServe(); err != nil {
 		panic(err)
 	}
+}
+
+func panicHandler(w http.ResponseWriter, r *http.Request, err interface{}) {
+	inspect.Do(err)
+	var exception *gexception.Exception
+	var ok bool
+	if exception, ok = err.(*gexception.Exception); !ok {
+		exception = gexception.BaseInternalServerError
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(exception.HttpStatus)
+	grest.WriteResponse(w, grest.Response{
+		Code:   exception.HttpStatus,
+		Status: exception.Code,
+		Data:   exception.Description,
+	})
 }

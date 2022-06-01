@@ -5,13 +5,14 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/resyahrial/go-commerce/pkg/inspect"
 	"github.com/resyahrial/go-commerce/pkg/transformers"
 	log "github.com/sirupsen/logrus"
 )
 
 type JwtTokenManager struct {
-	keyAccess        string
-	keyRefresh       string
+	keyAccess        []byte
+	keyRefresh       []byte
 	expiryAgeAccess  time.Duration
 	expiryAgeRefresh time.Duration
 }
@@ -25,8 +26,8 @@ type JwtTokenManagerOpts struct {
 
 func NewJwtTokenManager(opts JwtTokenManagerOpts) TokenManager {
 	return &JwtTokenManager{
-		keyAccess:        opts.KeyAccess,
-		keyRefresh:       opts.KeyRefresh,
+		keyAccess:        []byte(opts.KeyAccess),
+		keyRefresh:       []byte(opts.KeyRefresh),
 		expiryAgeAccess:  opts.ExpiryAgeAccess,
 		expiryAgeRefresh: opts.ExpiryAgeRefresh}
 }
@@ -47,7 +48,7 @@ func (t JwtTokenManager) ParseRefresh(tokenString string) (claims Claims, err er
 	return
 }
 
-func (t *JwtTokenManager) generate(claims Claims, key string, expiryAge time.Duration) (string, bool) {
+func (t *JwtTokenManager) generate(claims Claims, key []byte, expiryAge time.Duration) (string, bool) {
 	var tokenStr string
 	var claimsMap map[string]interface{}
 	var err error
@@ -71,6 +72,7 @@ func (t *JwtTokenManager) generate(claims Claims, key string, expiryAge time.Dur
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtMapClaims)
 	if tokenStr, err = token.SignedString(key); err != nil {
+		inspect.Do(err)
 		return "", false
 	}
 
