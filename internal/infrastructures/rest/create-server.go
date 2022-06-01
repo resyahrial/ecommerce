@@ -9,14 +9,24 @@ import (
 	api_v1 "github.com/resyahrial/go-commerce/internal/interfaces/http/api/v1"
 	"github.com/resyahrial/go-commerce/pkg/gexception"
 	"github.com/resyahrial/go-commerce/pkg/grest"
-	"github.com/resyahrial/go-commerce/pkg/inspect"
 )
 
 func CreateServer() {
 	router := httprouter.New()
+	authMiddleware := NewAuthMiddleware()
+	roleMiddleware := NewRoleMiddleware()
 
 	for path, route := range api_v1.GetRoute() {
-		router.Handle(route.Method, api_v1.Prefix+path, route.Handler)
+		handler := route.Handler
+		if route.Role != "" {
+			handler = roleMiddleware.Wrap(handler, route.Role)
+		}
+
+		if route.IsNeedAuth {
+			handler = authMiddleware.Wrap(handler)
+		}
+
+		router.Handle(route.Method, api_v1.Prefix+path, handler)
 	}
 
 	router.PanicHandler = panicHandler
@@ -34,7 +44,6 @@ func CreateServer() {
 }
 
 func panicHandler(w http.ResponseWriter, r *http.Request, err interface{}) {
-	inspect.Do(err)
 	var exception *gexception.Exception
 	var ok bool
 	if exception, ok = err.(*gexception.Exception); !ok {

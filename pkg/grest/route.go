@@ -8,10 +8,12 @@ import (
 )
 
 type Route struct {
-	Prefix  string
-	Path    string
-	Method  string
-	Handler func(w http.ResponseWriter, r *http.Request, p httprouter.Params)
+	Prefix     string
+	Path       string
+	Method     string
+	Handler    func(w http.ResponseWriter, r *http.Request, p httprouter.Params)
+	Role       string
+	IsNeedAuth bool
 }
 
 func RegisterRoute(routes map[string]Route, prefixPath string, as ...*Route) {
