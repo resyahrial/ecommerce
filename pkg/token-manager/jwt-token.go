@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/mitchellh/mapstructure"
 	"github.com/resyahrial/go-commerce/pkg/inspect"
 	"github.com/resyahrial/go-commerce/pkg/transformers"
 	log "github.com/sirupsen/logrus"
@@ -40,12 +41,12 @@ func (t *JwtTokenManager) GenerateRefresh(claims Claims) (string, bool) {
 	return t.generate(claims, t.keyRefresh, t.expiryAgeRefresh)
 }
 
-func (t JwtTokenManager) ParseAccess(tokenString string) (claims Claims, err error) {
-	return
+func (t *JwtTokenManager) ParseAccess(tokenString string) (claims Claims, err error) {
+	return t.parse(t.keyAccess, tokenString)
 }
 
-func (t JwtTokenManager) ParseRefresh(tokenString string) (claims Claims, err error) {
-	return
+func (t *JwtTokenManager) ParseRefresh(tokenString string) (claims Claims, err error) {
+	return t.parse(t.keyRefresh, tokenString)
 }
 
 func (t *JwtTokenManager) generate(claims Claims, key []byte, expiryAge time.Duration) (string, bool) {
@@ -79,31 +80,24 @@ func (t *JwtTokenManager) generate(claims Claims, key []byte, expiryAge time.Dur
 	return tokenStr, true
 }
 
-/*
-	- fix error statment
-	- cast claims
-*/
-func Parse(key string, tokenString string) (claims Claims, err error) {
+func (t *JwtTokenManager) parse(key []byte, tokenString string) (claims Claims, err error) {
 	var token *jwt.Token
 	if token, err = jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
 		return key, nil
 	}); err != nil {
 		return
 	}
 
 	if token.Valid {
-		err = fmt.Errorf("you look nice today")
+		err = fmt.Errorf("invalid token")
+		return
 	} else if ve, ok := err.(*jwt.ValidationError); ok {
-		if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-			err = fmt.Errorf("that's not even a token")
-		} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
-			// Token is either expired or not active yet
-			err = fmt.Errorf("timing is everything")
+		if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+			err = fmt.Errorf("token is either expired or not active yet")
 		} else {
 			err = fmt.Errorf("couldn't handle this token: %v", err)
 		}
@@ -111,10 +105,10 @@ func Parse(key string, tokenString string) (claims Claims, err error) {
 		err = fmt.Errorf("couldn't handle this token: %v", err)
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Println(claims["foo"], claims["nbf"])
-	} else {
-		fmt.Println(err)
+	if mapClaims, ok := token.Claims.(jwt.MapClaims); ok {
+		if err = mapstructure.Decode(mapClaims, &claims); err != nil {
+			return
+		}
 	}
 
 	return

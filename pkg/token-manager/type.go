@@ -10,5 +10,5 @@ type TokenManager interface {
 }
 
 type Claims struct {
-	ID string `json:"ID"`
+	ID string `json:"id"`
 }
