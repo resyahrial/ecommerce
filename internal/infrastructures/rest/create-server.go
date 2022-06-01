@@ -9,7 +9,6 @@ import (
 	api_v1 "github.com/resyahrial/go-commerce/internal/interfaces/http/api/v1"
 	"github.com/resyahrial/go-commerce/pkg/gexception"
 	"github.com/resyahrial/go-commerce/pkg/grest"
-	"github.com/resyahrial/go-commerce/pkg/inspect"
 )
 
 func CreateServer() {
@@ -34,7 +33,6 @@ func CreateServer() {
 }
 
 func panicHandler(w http.ResponseWriter, r *http.Request, err interface{}) {
-	inspect.Do(err)
 	var exception *gexception.Exception
 	var ok bool
 	if exception, ok = err.(*gexception.Exception); !ok {

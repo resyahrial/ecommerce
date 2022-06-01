@@ -5,8 +5,10 @@ import (
 	"net/http"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/resyahrial/go-commerce/config/app"
 	"github.com/resyahrial/go-commerce/internal/domains/user"
 	"github.com/resyahrial/go-commerce/internal/exceptions"
+	user_repo "github.com/resyahrial/go-commerce/internal/infrastructures/repositories/user"
 	"github.com/resyahrial/go-commerce/pkg/gctx"
 	"github.com/resyahrial/go-commerce/pkg/gtrace"
 	tokenmanager "github.com/resyahrial/go-commerce/pkg/token-manager"
@@ -15,17 +17,23 @@ import (
 )
 
 type AuthMiddleware struct {
-	handler      http.Handler
 	tokenManager tokenmanager.TokenManager
 	userRepo     user.UserRepo
+	nextHandler  http.Handler
 }
 
-func NewAuthMiddleware(
-	handler http.Handler,
-	tokenManager tokenmanager.TokenManager,
-	userRepo user.UserRepo,
-) *AuthMiddleware {
-	return &AuthMiddleware{handler, tokenManager, userRepo}
+func NewAuthMiddleware(nextHandler http.Handler) *AuthMiddleware {
+	tokenManager := tokenmanager.NewJwtTokenManager(
+		tokenmanager.JwtTokenManagerOpts{
+			KeyAccess:        app.KeyAccess,
+			KeyRefresh:       app.KeyRefresh,
+			ExpiryAgeAccess:  app.ExpiryAgeAccess,
+			ExpiryAgeRefresh: app.ExpiryAgeRefresh,
+		},
+	)
+
+	userRepo := user_repo.New(app.DB)
+	return &AuthMiddleware{tokenManager: tokenManager, userRepo: userRepo, nextHandler: nextHandler}
 }
 
 func (m *AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +55,7 @@ func (m *AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	newCtx = gctx.SetDataAndGetNewCtx(newCtx, gctx.CtxData{Actor: actor})
 
-	m.handler.ServeHTTP(w, r.WithContext(newCtx))
+	m.nextHandler.ServeHTTP(w, r.WithContext(newCtx))
 }
 
 func (m *AuthMiddleware) tokenValidation(ctx context.Context, token string) (userLogin user.User, err error) {
