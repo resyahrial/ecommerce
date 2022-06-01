@@ -13,9 +13,20 @@ import (
 
 func CreateServer() {
 	router := httprouter.New()
+	authMiddleware := NewAuthMiddleware()
+	roleMiddleware := NewRoleMiddleware()
 
 	for path, route := range api_v1.GetRoute() {
-		router.Handle(route.Method, api_v1.Prefix+path, route.Handler)
+		handler := route.Handler
+		if route.Role != "" {
+			handler = roleMiddleware.Wrap(handler, route.Role)
+		}
+
+		if route.IsNeedAuth {
+			handler = authMiddleware.Wrap(handler)
+		}
+
+		router.Handle(route.Method, api_v1.Prefix+path, handler)
 	}
 
 	router.PanicHandler = panicHandler

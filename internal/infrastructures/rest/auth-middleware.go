@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/julienschmidt/httprouter"
 	"github.com/mitchellh/mapstructure"
 	"github.com/resyahrial/go-commerce/config/app"
 	"github.com/resyahrial/go-commerce/internal/domains/user"
@@ -19,10 +20,9 @@ import (
 type AuthMiddleware struct {
 	tokenManager tokenmanager.TokenManager
 	userRepo     user.UserRepo
-	nextHandler  http.Handler
 }
 
-func NewAuthMiddleware(nextHandler http.Handler) *AuthMiddleware {
+func NewAuthMiddleware() *AuthMiddleware {
 	tokenManager := tokenmanager.NewJwtTokenManager(
 		tokenmanager.JwtTokenManagerOpts{
 			KeyAccess:        app.KeyAccess,
@@ -33,29 +33,31 @@ func NewAuthMiddleware(nextHandler http.Handler) *AuthMiddleware {
 	)
 
 	userRepo := user_repo.New(app.DB)
-	return &AuthMiddleware{tokenManager: tokenManager, userRepo: userRepo, nextHandler: nextHandler}
+	return &AuthMiddleware{tokenManager: tokenManager, userRepo: userRepo}
 }
 
-func (m *AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var err error
-	var userLogin user.User
-	var actor gctx.Actor
+func (m *AuthMiddleware) Wrap(nextHandler httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		var err error
+		var userLogin user.User
+		var actor gctx.Actor
 
-	newCtx, span := gtrace.Start(r.Context())
-	defer gtrace.End(span, err)
+		newCtx, span := gtrace.Start(r.Context())
+		defer gtrace.End(span, err)
 
-	token := r.Header.Get("authorization")
-	if userLogin, err = m.tokenValidation(newCtx, token); err != nil {
-		panic(err)
+		token := r.Header.Get("authorization")
+		if userLogin, err = m.tokenValidation(newCtx, token); err != nil {
+			panic(err)
+		}
+
+		if err = mapstructure.Decode(userLogin, &actor); err != nil {
+			panic(err)
+		}
+
+		newCtx = gctx.SetDataAndGetNewCtx(newCtx, gctx.CtxData{Actor: actor})
+
+		nextHandler(w, r.WithContext(newCtx), params)
 	}
-
-	if err = mapstructure.Decode(userLogin, &actor); err != nil {
-		panic(err)
-	}
-
-	newCtx = gctx.SetDataAndGetNewCtx(newCtx, gctx.CtxData{Actor: actor})
-
-	m.nextHandler.ServeHTTP(w, r.WithContext(newCtx))
 }
 
 func (m *AuthMiddleware) tokenValidation(ctx context.Context, token string) (userLogin user.User, err error) {
