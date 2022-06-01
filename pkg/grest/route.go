@@ -2,17 +2,15 @@ package grest
 
 import (
 	"net/http"
-	"reflect"
 
 	"github.com/julienschmidt/httprouter"
 	log "github.com/sirupsen/logrus"
 )
 
-var ExceptionType reflect.Type
-
 type Route struct {
 	Prefix  string
 	Path    string
+	Method  string
 	Handler func(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 }
 

@@ -4,6 +4,8 @@ import (
 	"flag"
 
 	"github.com/resyahrial/go-commerce/config"
+	"github.com/resyahrial/go-commerce/internal/infrastructures/rest"
+	api_v1 "github.com/resyahrial/go-commerce/internal/interfaces/http/api/v1"
 )
 
 func main() {
@@ -17,4 +19,6 @@ func main() {
 
 	config.Initialize(env)
 	defer config.Shutdown()
+
+	rest.CreateServer(api_v1.Prefix, api_v1.Routes)
 }

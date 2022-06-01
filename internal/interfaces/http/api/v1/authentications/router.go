@@ -1,6 +1,8 @@
 package authentication
 
 import (
+	"net/http"
+
 	"github.com/resyahrial/go-commerce/config/app"
 	"github.com/resyahrial/go-commerce/internal/infrastructures"
 	api_v1 "github.com/resyahrial/go-commerce/internal/interfaces/http/api/v1"
@@ -30,5 +32,6 @@ var handler AuthenticationHandlerInterface
 
 var LoginApi = &grest.Route{
 	Path:    "/login",
+	Method:  http.MethodPost,
 	Handler: handler.Login,
 }
