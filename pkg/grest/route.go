@@ -8,9 +8,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type RouteMap map[string]Route
-
-var Routes RouteMap
 var ExceptionType reflect.Type
 
 type Route struct {
@@ -19,14 +16,16 @@ type Route struct {
 	Handler func(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 }
 
-func RegisterRoute(prefixPath string, as ...*Route) {
+func RegisterRoute(routes map[string]Route, prefixPath string, as ...*Route) map[string]Route {
 	for _, a := range as {
 		a.Prefix = prefixPath
 		key := a.Prefix + a.Path
-		if _, result := Routes[key]; result {
-			log.Error(Routes[key])
+		if _, result := routes[key]; result {
+			log.Error(routes[key])
 			panic("duplicate api definition: " + key)
 		}
-		Routes[key] = *a
+		routes[key] = *a
 	}
+
+	return routes
 }
