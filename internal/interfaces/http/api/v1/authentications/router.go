@@ -5,13 +5,12 @@ import (
 
 	"github.com/resyahrial/go-commerce/config/app"
 	"github.com/resyahrial/go-commerce/internal/infrastructures"
-	api_v1 "github.com/resyahrial/go-commerce/internal/interfaces/http/api/v1"
 	"github.com/resyahrial/go-commerce/pkg/grest"
 	tokenmanager "github.com/resyahrial/go-commerce/pkg/token-manager"
 )
 
-func init() {
-	handler = New(infrastructures.InitAuthenticationUsecase(
+func Register(routes map[string]grest.Route) {
+	authUcase := infrastructures.InitAuthenticationUsecase(
 		app.DB,
 		tokenmanager.JwtTokenManagerOpts{
 			KeyAccess:        app.KeyAccess,
@@ -19,19 +18,16 @@ func init() {
 			ExpiryAgeAccess:  app.ExpiryAgeAccess,
 			ExpiryAgeRefresh: app.ExpiryAgeRefresh,
 		},
-	))
-
-	api_v1.Routes = grest.RegisterRoute(
-		api_v1.Routes,
-		"/authentications",
-		LoginApi,
 	)
-}
+	handler := New(authUcase)
 
-var handler AuthenticationHandlerInterface
-
-var LoginApi = &grest.Route{
-	Path:    "/login",
-	Method:  http.MethodPost,
-	Handler: handler.Login,
+	grest.RegisterRoute(
+		routes,
+		"/authentications",
+		&grest.Route{
+			Path:    "/login",
+			Method:  http.MethodPost,
+			Handler: handler.Login,
+		},
+	)
 }

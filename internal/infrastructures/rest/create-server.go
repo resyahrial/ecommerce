@@ -16,11 +16,13 @@ func CreateServer(prefix string, routes map[string]grest.Route) {
 		router.Handle(route.Method, prefix+path, route.Handler)
 	}
 
+	address := fmt.Sprintf("%s:%s", app.Host, app.Port)
 	server := http.Server{
-		Addr:    fmt.Sprintf("%s:%s", app.Host, app.Port),
+		Addr:    address,
 		Handler: router,
 	}
 
+	fmt.Printf("http://%s\n", address)
 	if err := server.ListenAndServe(); err != nil {
 		panic(err)
 	}

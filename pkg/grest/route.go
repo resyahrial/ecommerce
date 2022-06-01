@@ -14,7 +14,7 @@ type Route struct {
 	Handler func(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 }
 
-func RegisterRoute(routes map[string]Route, prefixPath string, as ...*Route) map[string]Route {
+func RegisterRoute(routes map[string]Route, prefixPath string, as ...*Route) {
 	for _, a := range as {
 		a.Prefix = prefixPath
 		key := a.Prefix + a.Path
@@ -24,6 +24,4 @@ func RegisterRoute(routes map[string]Route, prefixPath string, as ...*Route) map
 		}
 		routes[key] = *a
 	}
-
-	return routes
 }
