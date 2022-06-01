@@ -30,7 +30,7 @@ func Register(routes map[string]grest.Route) {
 			IsNeedAuth: true,
 		},
 		&grest.Route{
-			Path:       "/accept",
+			Path:       "/accept/:id",
 			Method:     http.MethodPatch,
 			Handler:    handler.Accept,
 			IsNeedAuth: true,
